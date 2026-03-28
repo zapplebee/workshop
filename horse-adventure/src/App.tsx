@@ -880,13 +880,13 @@ function WorkshopScene({
         </mesh>
       ))}
 
-      <mesh position={[-0.39, 0.24, 0]} rotation={[0, 0, -0.28]} castShadow receiveShadow>
-        <boxGeometry args={[0.3, 0.05, 0.05]} />
+      <mesh position={[-0.3, 0.24, 0]} rotation={[0, 0, -0.14]} castShadow receiveShadow>
+        <boxGeometry args={[0.34, 0.05, 0.05]} />
         <meshStandardMaterial color="#b89d8c" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[-0.62, 0.17, 0]} rotation={[0, 0, -0.48]} castShadow receiveShadow>
-        <boxGeometry args={[0.28, 0.045, 0.045]} />
+      <mesh position={[-0.46, 0.205, 0]} rotation={[0, 0, -0.3]} castShadow receiveShadow>
+        <boxGeometry args={[0.3, 0.045, 0.045]} />
         <meshStandardMaterial color="#b89d8c" roughness={1} flatShading />
       </mesh>
 
