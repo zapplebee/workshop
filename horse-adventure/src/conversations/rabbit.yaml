@@ -1,0 +1,40 @@
+start: greeting
+nodes:
+  greeting:
+    text: "The rabbit lifts its ears. 'You are the loudest horse in the canyon.'"
+    options:
+      - label: "Hello, rabbit"
+        next: hello
+      - label: "What are you doing?"
+        next: grazing
+      - label: "Goodbye"
+        end: "The rabbit twitches its nose and resumes watching the grass."
+  hello:
+    text: "'Hello yourself,' says the rabbit. 'Mind the sweet grass by the hill. I was saving that.'"
+    options:
+      - label: "I will be careful"
+        next: advice
+      - label: "I make no promises"
+        next: sass
+  grazing:
+    text: "'I supervise the meadow,' the rabbit says. 'Somebody has to keep the grass from getting ideas.'"
+    options:
+      - label: "That seems fair"
+        next: advice
+      - label: "Grass has ideas?"
+        next: ideas
+  advice:
+    text: "'If you are looking for the best bites, climb the hills. The wind keeps the good blades there.'"
+    options:
+      - label: "Thanks"
+        end: "The rabbit gives a proud little nod."
+  sass:
+    text: "The rabbit narrows its eyes. 'Then at least chew politely.'"
+    options:
+      - label: "Understood"
+        end: "The rabbit seems satisfied enough."
+  ideas:
+    text: "'Of course,' says the rabbit. 'Why else would it keep growing back?'"
+    options:
+      - label: "That is unsettling"
+        end: "'You get used to it,' the rabbit replies."

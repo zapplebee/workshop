@@ -1,0 +1,95 @@
+:root {
+  font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  color: #19311f;
+  background: #d8eadb;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+.scene-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(255, 240, 190, 0.88) 0, rgba(255, 240, 190, 0.48) 10%, rgba(159, 205, 245, 0) 30%),
+    linear-gradient(180deg, #7bb4ea 0%, #a9d4fb 28%, #d7eefb 58%, #dcebe0 78%, #c9dfb9 100%);
+}
+
+.scene-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.dialog-shell {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 1rem 1rem;
+  pointer-events: none;
+}
+
+.dialog-card {
+  width: min(36rem, 100%);
+  border: 2px solid rgba(255, 112, 191, 0.55);
+  border-radius: 1rem;
+  background: rgba(28, 39, 24, 0.9);
+  box-shadow: 0 1rem 2rem rgba(22, 33, 21, 0.24);
+  color: #f6f3ea;
+  padding: 1rem;
+  pointer-events: auto;
+}
+
+.dialog-name {
+  color: #ff8fd1;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dialog-text {
+  margin: 0.45rem 0 0;
+}
+
+.dialog-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.dialog-option {
+  border: 1px solid rgba(255, 143, 209, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff5fb;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.55rem 0.9rem;
+}
+
+.dialog-option:hover {
+  background: rgba(255, 143, 209, 0.18);
+}
+
+@media (prefers-reduced-motion) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+  }
+}
