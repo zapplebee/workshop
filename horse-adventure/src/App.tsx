@@ -5,10 +5,12 @@ import {
   Group,
   Mesh,
   MeshStandardMaterial,
+  Quaternion,
   SRGBColorSpace,
   TextureLoader,
   Vector3,
 } from "three";
+import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import "./index.css";
 import horseObjUrl from "./assets/horse/10026_Horse_v01-it2.obj";
@@ -64,6 +66,7 @@ type RabbitProps = {
   id: string;
   position: [number, number, number];
   highlighted?: boolean;
+  wireframe?: boolean;
 };
 
 type HorseConfig = Omit<HorseProps, "horseRef" | "keysRef" | "controlsLocked">;
@@ -83,6 +86,8 @@ type ConversationTree = {
   start: string;
   nodes: Record<string, ConversationNode>;
 };
+
+type SceneMode = "grasslands" | "workshop";
 
 type GrassInstance = PlantProps & {
   id: string;
@@ -249,6 +254,107 @@ function useCameraMode() {
   return mode;
 }
 
+function useSceneMode() {
+  const [sceneMode, setSceneMode] = useState<SceneMode>("grasslands");
+
+  useEffect(() => {
+    const modes: SceneMode[] = ["grasslands", "workshop"];
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== "ArrowLeft" && event.code !== "ArrowRight") {
+        return;
+      }
+
+      event.preventDefault();
+      setSceneMode((currentMode) => {
+        const currentIndex = modes.indexOf(currentMode);
+        const direction = event.code === "ArrowRight" ? 1 : -1;
+        const nextIndex = (currentIndex + direction + modes.length) % modes.length;
+        return modes[nextIndex];
+      });
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  return sceneMode;
+}
+
+function WorkshopGizmoScene({ quaternion }: { quaternion: [number, number, number, number] }) {
+  return (
+    <>
+      <color attach="background" args={["#12233d"]} />
+      <ambientLight intensity={1.1} />
+      <directionalLight position={[3, 4, 5]} intensity={1.4} />
+      <group quaternion={new Quaternion(...quaternion)}>
+        <mesh>
+          <boxGeometry args={[0.9, 0.9, 0.9]} />
+          <meshStandardMaterial color="#d7e4f5" roughness={0.9} flatShading wireframe />
+        </mesh>
+        <mesh position={[0.95, 0, 0]}>
+          <boxGeometry args={[1, 0.08, 0.08]} />
+          <meshStandardMaterial color="#ff7a7a" roughness={1} flatShading />
+        </mesh>
+        <mesh position={[0, 0.95, 0]}>
+          <boxGeometry args={[0.08, 1, 0.08]} />
+          <meshStandardMaterial color="#7dff9a" roughness={1} flatShading />
+        </mesh>
+        <mesh position={[0, 0, 0.95]}>
+          <boxGeometry args={[0.08, 0.08, 1]} />
+          <meshStandardMaterial color="#82b7ff" roughness={1} flatShading />
+        </mesh>
+      </group>
+    </>
+  );
+}
+
+function WorkshopControls({ onCameraQuaternionChange }: { onCameraQuaternionChange?: (quaternion: [number, number, number, number]) => void }) {
+  const { camera, gl } = useThree();
+  const controlsRef = useRef<ThreeOrbitControls | null>(null);
+  const lastQuaternionRef = useRef("");
+
+  useEffect(() => {
+    camera.position.set(0, 2.8, 8);
+    const controls = new ThreeOrbitControls(camera, gl.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 0.6, 0);
+    controls.enablePan = true;
+    controls.minDistance = 2;
+    controls.maxDistance = 30;
+    controls.maxPolarAngle = Math.PI * 0.48;
+    controls.update();
+    controlsRef.current = controls;
+
+    return () => {
+      controls.dispose();
+      controlsRef.current = null;
+    };
+  }, [camera, gl]);
+
+  useFrame(() => {
+    controlsRef.current?.update();
+
+    if (!onCameraQuaternionChange) {
+      return;
+    }
+
+    const next: [number, number, number, number] = [camera.quaternion.x, camera.quaternion.y, camera.quaternion.z, camera.quaternion.w];
+    const key = next.join(":");
+
+    if (key !== lastQuaternionRef.current) {
+      lastQuaternionRef.current = key;
+      onCameraQuaternionChange(next);
+    }
+  });
+
+  return null;
+}
+
 function createArenaGrass(): GrassInstance[] {
   const tufts: GrassInstance[] = [];
   const tuftCount = 2600;
@@ -341,7 +447,7 @@ const GrassTuft = memo(function GrassTuft({
   );
 });
 
-const Rabbit = memo(function Rabbit({ position, highlighted = false }: RabbitProps) {
+const Rabbit = memo(function Rabbit({ position, highlighted = false, wireframe = false }: RabbitProps) {
   return (
     <group position={[position[0], getTerrainHeight(position[0], position[2]) + 0.2, position[2]]}>
       {highlighted ? (
@@ -363,19 +469,19 @@ const Rabbit = memo(function Rabbit({ position, highlighted = false }: RabbitPro
 
       <mesh castShadow position={[0, 0.34, 0]} scale={[0.84, 0.6, 0.6]}>
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#efe8de" roughness={1} flatShading />
+        <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe={wireframe} />
       </mesh>
       <mesh castShadow position={[-0.12, 0.82, 0]} scale={[0.16, 0.56, 0.16]}>
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#efe8de" roughness={1} flatShading />
+        <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe={wireframe} />
       </mesh>
       <mesh castShadow position={[0.12, 0.82, 0]} scale={[0.16, 0.56, 0.16]}>
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#efe8de" roughness={1} flatShading />
+        <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe={wireframe} />
       </mesh>
       <mesh castShadow position={[0.32, 0.24, -0.08]} scale={[0.22, 0.18, 0.18]}>
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#efe8de" roughness={1} flatShading />
+        <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe={wireframe} />
       </mesh>
     </group>
   );
@@ -702,6 +808,122 @@ function CanyonRing() {
   );
 }
 
+function WorkshopScene({ onCameraQuaternionChange }: { onCameraQuaternionChange?: (quaternion: [number, number, number, number]) => void }) {
+  const rabbitEarTop = 0.82 + 0.28;
+  const rabbitBodyHeight = 0.6;
+  const horseLift = 0.18;
+
+  return (
+    <>
+      <WorkshopControls onCameraQuaternionChange={onCameraQuaternionChange} />
+
+      <color attach="background" args={["#2f78d8"]} />
+      <fog attach="fog" args={["#2f78d8", 40, 120]} />
+
+      <ambientLight intensity={1.2} color="#dfeeff" />
+      <hemisphereLight intensity={1} skyColor="#9fd2ff" groundColor="#8ea2b8" />
+      <directionalLight position={[8, 14, 10]} intensity={2.2} color="#fff0c2" castShadow />
+
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[80, 80]} />
+        <meshStandardMaterial color="#50555d" roughness={1} flatShading />
+      </mesh>
+
+      <mesh position={[0, rabbitEarTop + rabbitBodyHeight * 0.5 + horseLift, 0]} castShadow receiveShadow>
+        <boxGeometry args={[rabbitBodyHeight * 2.5, rabbitBodyHeight, rabbitBodyHeight]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[-0.75, rabbitEarTop + 0.36 + horseLift, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.72, 0.72, 0.72]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[-1.24, rabbitEarTop + 0.12 + horseLift, 0]} rotation={[0, 0, -0.34]} castShadow receiveShadow>
+        <boxGeometry args={[0.14, 0.72, 0.14]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[0.82, rabbitEarTop + 0.31 + horseLift, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.5, 0.62, 0.5]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[1.14, rabbitEarTop + 0.56 + horseLift, 0]} rotation={[0, 0, -0.52]} castShadow receiveShadow>
+        <boxGeometry args={[0.34, 1.02, 0.34]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[1.6, rabbitEarTop + 1.0 + horseLift, 0]} rotation={[0, 0, -0.22]} castShadow receiveShadow>
+        <boxGeometry args={[0.72, 0.34, 0.34]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[1.45, rabbitEarTop + 1.24 + horseLift, -0.1]} rotation={[0, 0, -0.12]} castShadow receiveShadow>
+        <boxGeometry args={[0.12, 0.34, 0.12]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[1.45, rabbitEarTop + 1.24 + horseLift, 0.1]} rotation={[0, 0, -0.12]} castShadow receiveShadow>
+        <boxGeometry args={[0.12, 0.34, 0.12]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[0.92, rabbitEarTop + 0.02 + horseLift, -0.15]} rotation={[0, 0, 0.04]} castShadow receiveShadow>
+        <boxGeometry args={[0.22, 0.74, 0.22]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[0.92, rabbitEarTop + 0.02 + horseLift, 0.15]} rotation={[0, 0, 0.04]} castShadow receiveShadow>
+        <boxGeometry args={[0.22, 0.74, 0.22]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[0.94, rabbitEarTop - 0.62, -0.15]} rotation={[0, 0, -0.02]} castShadow receiveShadow>
+        <boxGeometry args={[0.18, 1.04, 0.18]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[0.94, rabbitEarTop - 0.62, 0.15]} rotation={[0, 0, -0.02]} castShadow receiveShadow>
+        <boxGeometry args={[0.18, 1.04, 0.18]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[-0.92, rabbitEarTop + 0.2 + horseLift, -0.2]} rotation={[0, 0, 0.24]} castShadow receiveShadow>
+        <boxGeometry args={[0.3, 0.74, 0.3]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[-0.92, rabbitEarTop + 0.2 + horseLift, 0.2]} rotation={[0, 0, 0.24]} castShadow receiveShadow>
+        <boxGeometry args={[0.3, 0.74, 0.3]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[-0.98, rabbitEarTop - 0.34 + horseLift, -0.2]} rotation={[0, 0, -0.22]} castShadow receiveShadow>
+        <boxGeometry args={[0.24, 0.82, 0.24]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[-0.98, rabbitEarTop - 0.34 + horseLift, 0.2]} rotation={[0, 0, -0.22]} castShadow receiveShadow>
+        <boxGeometry args={[0.24, 0.82, 0.24]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[-0.94, rabbitEarTop - 0.92, -0.2]} rotation={[0, 0, 0.08]} castShadow receiveShadow>
+        <boxGeometry args={[0.2, 1.02, 0.2]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <mesh position={[-0.94, rabbitEarTop - 0.92, 0.2]} rotation={[0, 0, 0.08]} castShadow receiveShadow>
+        <boxGeometry args={[0.2, 1.02, 0.2]} />
+        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      </mesh>
+
+      <Rabbit id="workshop-rabbit" position={[3.5, 0, 0]} wireframe />
+    </>
+  );
+}
+
 function Scene({ controlsLocked = false, onRabbitInteract }: { controlsLocked?: boolean; onRabbitInteract: () => void }) {
   const horseRef = useRef<Group>(null);
   const cameraMode = useCameraMode();
@@ -793,6 +1015,8 @@ function Scene({ controlsLocked = false, onRabbitInteract }: { controlsLocked?: 
 }
 
 export function App() {
+  const [workshopCameraQuaternion, setWorkshopCameraQuaternion] = useState<[number, number, number, number]>([0, 0, 0, 1]);
+  const sceneMode = useSceneMode();
   const [conversation, setConversation] = useState<ConversationTree | null>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const activeNode = currentNodeId && conversation ? conversation.nodes[currentNodeId] : null;
@@ -821,6 +1045,10 @@ export function App() {
   }, []);
 
   const handleRabbitInteract = () => {
+    if (sceneMode !== "grasslands") {
+      return;
+    }
+
     if (!conversation) {
       return;
     }
@@ -831,6 +1059,10 @@ export function App() {
   const closeConversation = () => {
     setCurrentNodeId(null);
   };
+
+  useEffect(() => {
+    setCurrentNodeId(null);
+  }, [sceneMode]);
 
   const handleConversationOption = (option: ConversationOption) => {
     if (option.next) {
@@ -847,14 +1079,22 @@ export function App() {
         shadows
         className="scene-canvas"
         dpr={[1, 1.5]}
-        camera={{ position: [0, 14, 42], fov: 42, near: 0.1, far: 700 }}
+        camera={
+          sceneMode === "grasslands"
+            ? { position: [0, 14, 42], fov: 42, near: 0.1, far: 700 }
+            : { position: [0, 6, 14], fov: 46, near: 0.1, far: 200 }
+        }
       >
         <Suspense fallback={null}>
-          <Scene controlsLocked={activeNode !== null} onRabbitInteract={handleRabbitInteract} />
+          {sceneMode === "grasslands" ? (
+            <Scene controlsLocked={activeNode !== null} onRabbitInteract={handleRabbitInteract} />
+          ) : (
+            <WorkshopScene onCameraQuaternionChange={setWorkshopCameraQuaternion} />
+          )}
         </Suspense>
       </Canvas>
 
-      {activeNode ? (
+      {activeNode && sceneMode === "grasslands" ? (
         <div className="dialog-shell">
           <div className="dialog-card">
             <div className="dialog-name">Rabbit</div>
@@ -873,6 +1113,20 @@ export function App() {
             </div>
           </div>
         </div>
+      ) : null}
+
+      {sceneMode === "workshop" ? (
+        <>
+          <div className="workshop-hud">
+            <div className="workshop-title">Workshop Camera</div>
+            <p className="workshop-help">Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.</p>
+          </div>
+          <div className="workshop-gizmo">
+            <Canvas className="workshop-gizmo-canvas" camera={{ position: [0, 0, 4], fov: 32, near: 0.1, far: 20 }}>
+              <WorkshopGizmoScene quaternion={workshopCameraQuaternion} />
+            </Canvas>
+          </div>
+        </>
       ) : null}
     </div>
   );
