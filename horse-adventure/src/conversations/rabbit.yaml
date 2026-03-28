@@ -1,7 +1,10 @@
+actor: rabbit
+name: Rabbit
 start: greeting
 nodes:
   greeting:
     text: "The rabbit lifts its ears. 'You are the loudest horse in the canyon.'"
+    animation: jiggle_ears
     options:
       - label: "Hello, rabbit"
         next: hello
@@ -11,6 +14,7 @@ nodes:
         end: "The rabbit twitches its nose and resumes watching the grass."
   hello:
     text: "'Hello yourself,' says the rabbit. 'Mind the sweet grass by the hill. I was saving that.'"
+    animation: jiggle_ears
     options:
       - label: "I will be careful"
         next: advice
@@ -18,6 +22,7 @@ nodes:
         next: sass
   grazing:
     text: "'I supervise the meadow,' the rabbit says. 'Somebody has to keep the grass from getting ideas.'"
+    animation: stand
     options:
       - label: "That seems fair"
         next: advice
@@ -25,16 +30,19 @@ nodes:
         next: ideas
   advice:
     text: "'If you are looking for the best bites, climb the hills. The wind keeps the good blades there.'"
+    animation: stand
     options:
       - label: "Thanks"
         end: "The rabbit gives a proud little nod."
   sass:
     text: "The rabbit narrows its eyes. 'Then at least chew politely.'"
+    animation: jiggle_ears
     options:
       - label: "Understood"
         end: "The rabbit seems satisfied enough."
   ideas:
     text: "'Of course,' says the rabbit. 'Why else would it keep growing back?'"
+    animation: jiggle_ears
     options:
       - label: "That is unsettling"
         end: "'You get used to it,' the rabbit replies."

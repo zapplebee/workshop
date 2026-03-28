@@ -1,20 +1,15 @@
-import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, memo, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import {
   DoubleSide,
   Group,
-  Mesh,
-  MeshStandardMaterial,
   Quaternion,
-  SRGBColorSpace,
-  TextureLoader,
   Vector3,
 } from "three";
 import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import "./index.css";
-import horseObjUrl from "./assets/horse/10026_Horse_v01-it2.obj";
-import horseTextureUrl from "./assets/horse/Horse_v01.jpg";
+import { WORKSHOP_RABBIT_POSITION, WorkshopHorse, type WorkshopHorseAction } from "./workshopHorse";
+import { WorkshopSnake, type WorkshopSnakeAction } from "./workshopSnake";
 
 type PlantProps = {
   position: [number, number, number];
@@ -42,6 +37,7 @@ type HorseProps = {
   horseRef?: RefObject<Group | null>;
   keysRef: RefObject<MovementKeys>;
   controlsLocked?: boolean;
+  actionOverride?: WorkshopHorseAction | null;
 };
 
 type MovementKeys = {
@@ -53,7 +49,8 @@ type MovementKeys = {
 
 type CameraMode = "overview" | "follow";
 
-type InteractionKind = "grass" | "rabbit";
+type InteractionKind = "grass" | "rabbit" | "snake";
+type ConversationActor = "rabbit" | "snake";
 
 type InteractionTarget = {
   id: string;
@@ -79,13 +76,18 @@ type ConversationOption = {
 
 type ConversationNode = {
   text: string;
+  animation?: string;
   options?: ConversationOption[];
 };
 
 type ConversationTree = {
+  actor: ConversationActor;
+  name: string;
   start: string;
   nodes: Record<string, ConversationNode>;
 };
+
+type ConversationStore = Partial<Record<ConversationActor, ConversationTree>>;
 
 type SceneMode = "grasslands" | "workshop";
 
@@ -134,6 +136,8 @@ const clouds: CloudProps[] = [
   { position: [1.5, 20.4, -10], scale: 2.8, drift: 0.05 },
 ];
 
+const snakePosition: [number, number, number] = [-3.6, 0, -4.8];
+
 const horses: HorseConfig[] = [
   { position: [1.2, 0.02, -2.8], scale: 0.92, rotationY: -0.18 },
 ];
@@ -142,7 +146,7 @@ const PLAY_AREA_RADIUS = 200;
 const CANYON_WALL_THICKNESS = 24;
 const CANYON_WALL_HEIGHT = 36;
 const CANYON_SEGMENTS = 24;
-const HORSE_MOVE_SPEED = 18;
+const HORSE_MOVE_SPEED = 8;
 const HORSE_TURN_SPEED = 2.4;
 const HORSE_BOUNDARY_PADDING = 8;
 const HORSE_GROUND_OFFSET = 0.02;
@@ -394,25 +398,6 @@ const arenaGrassInstances = createArenaGrass();
 const plantInstances = createGrassInstances(plants, "plant");
 const accentPlantInstances = createGrassInstances(accentPlants, "accent");
 
-const bladeOffsets = [
-  [-0.02, 0.02, 0.01],
-  [-0.015, 0.01, -0.015],
-  [-0.01, 0, 0.02],
-  [-0.006, 0.02, -0.01],
-  [0, 0.01, 0.015],
-  [0.006, 0.02, -0.014],
-  [0.012, 0.01, 0.005],
-  [0.016, 0.03, 0.012],
-  [0.022, 0.01, -0.006],
-  [0.018, 0.02, 0.008],
-  [-0.008, 0.03, 0.015],
-  [0.01, 0.02, -0.016],
-  [-0.03, 0.01, -0.004],
-  [0.028, 0.02, 0.014],
-  [-0.022, 0.015, 0.026],
-  [0.024, 0.01, -0.022],
-] as const;
-
 const GrassTuft = memo(function GrassTuft({
   position,
   scale = 1,
@@ -523,27 +508,10 @@ function Cloud({ position, scale, drift = 0 }: CloudProps) {
   );
 }
 
-function Horse({ position, scale, rotationY = 0, horseRef, keysRef, controlsLocked = false }: HorseProps) {
-  const horse = useLoader(OBJLoader, horseObjUrl);
-  const horseTexture = useLoader(TextureLoader, horseTextureUrl);
+function Horse({ position, scale, rotationY = 0, horseRef, keysRef, controlsLocked = false, actionOverride = null }: HorseProps) {
   const localGroupRef = useRef<Group>(null);
   const groupRef = horseRef ?? localGroupRef;
-
-  const model = useMemo(() => {
-    const clone = horse.clone(true) as Group;
-    horseTexture.colorSpace = SRGBColorSpace;
-    const material = new MeshStandardMaterial({ map: horseTexture, roughness: 0.88 });
-
-    clone.traverse((child) => {
-      if (child instanceof Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        child.material = material;
-      }
-    });
-
-    return clone;
-  }, [horse]);
+  const [action, setAction] = useState<WorkshopHorseAction>(actionOverride ?? "stand");
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -582,6 +550,13 @@ function Horse({ position, scale, rotationY = 0, horseRef, keysRef, controlsLock
     group.position.y = getTerrainHeight(group.position.x, group.position.z) + HORSE_GROUND_OFFSET;
   });
 
+  useFrame(() => {
+    const moving = keysRef.current.forward || keysRef.current.backward || keysRef.current.left || keysRef.current.right;
+    const nextAction = actionOverride ?? (moving && !controlsLocked ? "walk" : "stand");
+
+    setAction((currentAction) => (currentAction === nextAction ? currentAction : nextAction));
+  });
+
   useEffect(() => {
     const group = groupRef.current;
 
@@ -593,13 +568,8 @@ function Horse({ position, scale, rotationY = 0, horseRef, keysRef, controlsLock
   }, [groupRef]);
 
   return (
-    <group ref={groupRef} position={position} rotation={[0, rotationY, 0]}>
-      <primitive
-        object={model}
-        position={[0, 0, 0]}
-        rotation={[-Math.PI / 2, 0, Math.PI / 2]}
-        scale={scale * 0.001}
-      />
+    <group ref={groupRef} position={position} rotation={[0, rotationY, 0]} scale={scale}>
+      <WorkshopHorse action={action} showSkeleton={false} wireframe={false} />
     </group>
   );
 }
@@ -808,11 +778,15 @@ function CanyonRing() {
   );
 }
 
-function WorkshopScene({ onCameraQuaternionChange }: { onCameraQuaternionChange?: (quaternion: [number, number, number, number]) => void }) {
-  const rabbitEarTop = 0.82 + 0.28;
-  const rabbitBodyHeight = 0.6;
-  const horseLift = 0.18;
-
+function WorkshopScene({
+  onCameraQuaternionChange,
+  snakeAction,
+  wireframe,
+}: {
+  onCameraQuaternionChange?: (quaternion: [number, number, number, number]) => void;
+  snakeAction: WorkshopSnakeAction;
+  wireframe: boolean;
+}) {
   return (
     <>
       <WorkshopControls onCameraQuaternionChange={onCameraQuaternionChange} />
@@ -829,122 +803,143 @@ function WorkshopScene({ onCameraQuaternionChange }: { onCameraQuaternionChange?
         <meshStandardMaterial color="#50555d" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[0, rabbitEarTop + rabbitBodyHeight * 0.5 + horseLift, 0]} castShadow receiveShadow>
-        <boxGeometry args={[rabbitBodyHeight * 2.5, rabbitBodyHeight, rabbitBodyHeight]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0, 0.3315, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.51, 0.51, 0.51]} />
+        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[-0.75, rabbitEarTop + 0.36 + horseLift, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.72, 0.72, 0.72]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[-0.2, 0.0765, -0.22]} castShadow receiveShadow>
+        <boxGeometry args={[0.153, 0.153, 0.153]} />
+        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[-1.24, rabbitEarTop + 0.12 + horseLift, 0]} rotation={[0, 0, -0.34]} castShadow receiveShadow>
-        <boxGeometry args={[0.14, 0.72, 0.14]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[-0.2, 0.0765, 0.22]} castShadow receiveShadow>
+        <boxGeometry args={[0.153, 0.153, 0.153]} />
+        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[0.82, rabbitEarTop + 0.31 + horseLift, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.5, 0.62, 0.5]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0.2, 0.0765, -0.22]} castShadow receiveShadow>
+        <boxGeometry args={[0.153, 0.153, 0.153]} />
+        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[1.14, rabbitEarTop + 0.56 + horseLift, 0]} rotation={[0, 0, -0.52]} castShadow receiveShadow>
-        <boxGeometry args={[0.34, 1.02, 0.34]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0.2, 0.0765, 0.22]} castShadow receiveShadow>
+        <boxGeometry args={[0.153, 0.153, 0.153]} />
+        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[1.6, rabbitEarTop + 1.0 + horseLift, 0]} rotation={[0, 0, -0.22]} castShadow receiveShadow>
-        <boxGeometry args={[0.72, 0.34, 0.34]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0.33, 0.46, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.33, 0.33, 0.33]} />
+        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[1.45, rabbitEarTop + 1.24 + horseLift, -0.1]} rotation={[0, 0, -0.12]} castShadow receiveShadow>
-        <boxGeometry args={[0.12, 0.34, 0.12]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0.28, 0.67, -0.16]} castShadow receiveShadow>
+        <boxGeometry args={[0.04, 0.24, 0.18]} />
+        <meshStandardMaterial color="#8a7867" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[1.45, rabbitEarTop + 1.24 + horseLift, 0.1]} rotation={[0, 0, -0.12]} castShadow receiveShadow>
-        <boxGeometry args={[0.12, 0.34, 0.12]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0.28, 0.67, 0.16]} castShadow receiveShadow>
+        <boxGeometry args={[0.04, 0.24, 0.18]} />
+        <meshStandardMaterial color="#8a7867" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[0.92, rabbitEarTop + 0.02 + horseLift, -0.15]} rotation={[0, 0, 0.04]} castShadow receiveShadow>
-        <boxGeometry args={[0.22, 0.74, 0.22]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0.39, 0.49, -0.18]} castShadow receiveShadow>
+        <boxGeometry args={[0.05, 0.05, 0.05]} />
+        <meshStandardMaterial color="#111111" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[0.92, rabbitEarTop + 0.02 + horseLift, 0.15]} rotation={[0, 0, 0.04]} castShadow receiveShadow>
-        <boxGeometry args={[0.22, 0.74, 0.22]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0.39, 0.49, 0.18]} castShadow receiveShadow>
+        <boxGeometry args={[0.05, 0.05, 0.05]} />
+        <meshStandardMaterial color="#111111" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[0.94, rabbitEarTop - 0.62, -0.15]} rotation={[0, 0, -0.02]} castShadow receiveShadow>
-        <boxGeometry args={[0.18, 1.04, 0.18]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[0.515, 0.39, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.05, 0.05, 0.05]} />
+        <meshStandardMaterial color="#111111" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[0.94, rabbitEarTop - 0.62, 0.15]} rotation={[0, 0, -0.02]} castShadow receiveShadow>
-        <boxGeometry args={[0.18, 1.04, 0.18]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      {[
+        [0.49, 0.45, -0.22],
+        [0.49, 0.39, -0.24],
+        [0.49, 0.33, -0.22],
+      ].map((position, index) => (
+        <mesh key={`mouse-whisker-left-${index}`} position={position as [number, number, number]} castShadow receiveShadow>
+          <boxGeometry args={[0.015, 0.015, 0.16]} />
+          <meshStandardMaterial color="#e7e0d8" roughness={1} flatShading />
+        </mesh>
+      ))}
+
+      {[
+        [0.49, 0.45, 0.22],
+        [0.49, 0.39, 0.24],
+        [0.49, 0.33, 0.22],
+      ].map((position, index) => (
+        <mesh key={`mouse-whisker-right-${index}`} position={position as [number, number, number]} castShadow receiveShadow>
+          <boxGeometry args={[0.015, 0.015, 0.16]} />
+          <meshStandardMaterial color="#e7e0d8" roughness={1} flatShading />
+        </mesh>
+      ))}
+
+      <mesh position={[-0.39, 0.24, 0]} rotation={[0, 0, -0.28]} castShadow receiveShadow>
+        <boxGeometry args={[0.3, 0.05, 0.05]} />
+        <meshStandardMaterial color="#b89d8c" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[-0.92, rabbitEarTop + 0.2 + horseLift, -0.2]} rotation={[0, 0, 0.24]} castShadow receiveShadow>
-        <boxGeometry args={[0.3, 0.74, 0.3]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
+      <mesh position={[-0.62, 0.17, 0]} rotation={[0, 0, -0.48]} castShadow receiveShadow>
+        <boxGeometry args={[0.28, 0.045, 0.045]} />
+        <meshStandardMaterial color="#b89d8c" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[-0.92, rabbitEarTop + 0.2 + horseLift, 0.2]} rotation={[0, 0, 0.24]} castShadow receiveShadow>
-        <boxGeometry args={[0.3, 0.74, 0.3]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
-      </mesh>
-
-      <mesh position={[-0.98, rabbitEarTop - 0.34 + horseLift, -0.2]} rotation={[0, 0, -0.22]} castShadow receiveShadow>
-        <boxGeometry args={[0.24, 0.82, 0.24]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
-      </mesh>
-
-      <mesh position={[-0.98, rabbitEarTop - 0.34 + horseLift, 0.2]} rotation={[0, 0, -0.22]} castShadow receiveShadow>
-        <boxGeometry args={[0.24, 0.82, 0.24]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
-      </mesh>
-
-      <mesh position={[-0.94, rabbitEarTop - 0.92, -0.2]} rotation={[0, 0, 0.08]} castShadow receiveShadow>
-        <boxGeometry args={[0.2, 1.02, 0.2]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
-      </mesh>
-
-      <mesh position={[-0.94, rabbitEarTop - 0.92, 0.2]} rotation={[0, 0, 0.08]} castShadow receiveShadow>
-        <boxGeometry args={[0.2, 1.02, 0.2]} />
-        <meshStandardMaterial color="#c58b62" roughness={1} flatShading wireframe />
-      </mesh>
-
-      <Rabbit id="workshop-rabbit" position={[3.5, 0, 0]} wireframe />
+      <Rabbit id="workshop-rabbit" position={WORKSHOP_RABBIT_POSITION} wireframe />
     </>
   );
 }
 
-function Scene({ controlsLocked = false, onRabbitInteract }: { controlsLocked?: boolean; onRabbitInteract: () => void }) {
+function Scene({
+  controlsLocked = false,
+  conversationActive = false,
+  conversationActor = null,
+  conversationNodeAnimation,
+  onConversationStart,
+}: {
+  controlsLocked?: boolean;
+  conversationActive?: boolean;
+  conversationActor?: ConversationActor | null;
+  conversationNodeAnimation?: string;
+  onConversationStart: (actor: ConversationActor) => void;
+}) {
   const horseRef = useRef<Group>(null);
   const cameraMode = useCameraMode();
   const keysRef = useMovementKeys();
+  const eatTimeoutRef = useRef<number | null>(null);
   const [grassItems, setGrassItems] = useState<GrassInstance[]>(() => [
     ...accentPlantInstances,
     ...arenaGrassInstances,
     ...plantInstances,
   ]);
   const [nearestInteractionId, setNearestInteractionId] = useState<string | null>(null);
+  const [horseActionOverride, setHorseActionOverride] = useState<WorkshopHorseAction | null>(null);
   const rabbit: RabbitProps = { id: "rabbit-0", position: RABBIT_POSITION };
   const interactables = useMemo<InteractionTarget[]>(
     () => [
       ...grassItems.map((item) => ({ id: item.id, kind: "grass" as const, position: item.position })),
       { id: rabbit.id, kind: "rabbit" as const, position: rabbit.position, range: 3.5 },
+      { id: "snake-0", kind: "snake" as const, position: snakePosition, range: 4 },
     ],
     [grassItems],
   );
 
   const handleInteract = (target: InteractionTarget) => {
     if (target.kind === "grass") {
+      if (eatTimeoutRef.current !== null) {
+        window.clearTimeout(eatTimeoutRef.current);
+      }
+
+      setHorseActionOverride("eat");
+      eatTimeoutRef.current = window.setTimeout(() => {
+        setHorseActionOverride(null);
+        eatTimeoutRef.current = null;
+      }, 1200);
       setGrassItems((currentItems) => currentItems.filter((item) => item.id !== target.id));
       setNearestInteractionId((currentId) => (currentId === target.id ? null : currentId));
       return;
@@ -952,9 +947,42 @@ function Scene({ controlsLocked = false, onRabbitInteract }: { controlsLocked?: 
 
     if (target.kind === "rabbit") {
       setNearestInteractionId(target.id);
-      onRabbitInteract();
+      onConversationStart("rabbit");
+      return;
+    }
+
+    if (target.kind === "snake") {
+      setNearestInteractionId(target.id);
+      onConversationStart("snake");
     }
   };
+
+  useEffect(() => {
+    if (conversationActive) {
+      if (eatTimeoutRef.current !== null) {
+        window.clearTimeout(eatTimeoutRef.current);
+        eatTimeoutRef.current = null;
+      }
+
+      setHorseActionOverride(null);
+    }
+  }, [conversationActive]);
+
+  const snakeAction: WorkshopSnakeAction = conversationActor === "snake"
+    ? ((conversationNodeAnimation as WorkshopSnakeAction | undefined) ?? "idle")
+    : "idle";
+
+  const horseConversationAction: WorkshopHorseAction | null = conversationActor === "rabbit"
+    ? ((conversationNodeAnimation as WorkshopHorseAction | undefined) ?? "jiggle_ears")
+    : null;
+
+  useEffect(() => {
+    return () => {
+      if (eatTimeoutRef.current !== null) {
+        window.clearTimeout(eatTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -990,11 +1018,16 @@ function Scene({ controlsLocked = false, onRabbitInteract }: { controlsLocked?: 
         <Horse
           key={`horse-${index}`}
           {...horse}
+          actionOverride={horseConversationAction ?? horseActionOverride}
           controlsLocked={controlsLocked}
           keysRef={keysRef}
           horseRef={index === 0 ? horseRef : undefined}
         />
       ))}
+
+      <group position={[snakePosition[0], getTerrainHeight(snakePosition[0], snakePosition[2]) + 0.02, snakePosition[2]]} rotation={[0, 0.22, 0]}>
+        <WorkshopSnake action={snakeAction} highlighted={nearestInteractionId === "snake-0"} showSkeleton={false} wireframe={false} />
+      </group>
 
       <Rabbit {...rabbit} highlighted={rabbit.id === nearestInteractionId} />
 
@@ -1016,26 +1049,34 @@ function Scene({ controlsLocked = false, onRabbitInteract }: { controlsLocked?: 
 
 export function App() {
   const [workshopCameraQuaternion, setWorkshopCameraQuaternion] = useState<[number, number, number, number]>([0, 0, 0, 1]);
+  const [workshopSnakeAction, setWorkshopSnakeAction] = useState<WorkshopSnakeAction>("slither");
+  const [workshopSnakeWireframe, setWorkshopSnakeWireframe] = useState(true);
   const sceneMode = useSceneMode();
-  const [conversation, setConversation] = useState<ConversationTree | null>(null);
+  const [conversations, setConversations] = useState<ConversationStore>({});
+  const [activeConversationActor, setActiveConversationActor] = useState<ConversationActor | null>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
-  const activeNode = currentNodeId && conversation ? conversation.nodes[currentNodeId] : null;
+  const activeConversation = activeConversationActor ? conversations[activeConversationActor] ?? null : null;
+  const activeNode = currentNodeId && activeConversation ? activeConversation.nodes[currentNodeId] : null;
 
   useEffect(() => {
     let cancelled = false;
 
     const loadConversation = async () => {
-      const response = await fetch("/api/conversations/rabbit");
-      const data = (await response.json()) as ConversationTree;
+      const [rabbitResponse, snakeResponse] = await Promise.all([
+        fetch("/api/conversations/rabbit"),
+        fetch("/api/conversations/snake"),
+      ]);
+      const rabbit = (await rabbitResponse.json()) as ConversationTree;
+      const snake = (await snakeResponse.json()) as ConversationTree;
 
       if (!cancelled) {
-        setConversation(data);
+        setConversations({ rabbit, snake });
       }
     };
 
     loadConversation().catch(() => {
       if (!cancelled) {
-        setConversation(null);
+        setConversations({});
       }
     });
 
@@ -1044,19 +1085,23 @@ export function App() {
     };
   }, []);
 
-  const handleRabbitInteract = () => {
+  const handleConversationStart = (actor: ConversationActor) => {
     if (sceneMode !== "grasslands") {
       return;
     }
+
+    const conversation = conversations[actor];
 
     if (!conversation) {
       return;
     }
 
+    setActiveConversationActor(actor);
     setCurrentNodeId(conversation.start);
   };
 
   const closeConversation = () => {
+    setActiveConversationActor(null);
     setCurrentNodeId(null);
   };
 
@@ -1087,9 +1132,19 @@ export function App() {
       >
         <Suspense fallback={null}>
           {sceneMode === "grasslands" ? (
-            <Scene controlsLocked={activeNode !== null} onRabbitInteract={handleRabbitInteract} />
+            <Scene
+              conversationActive={activeNode !== null}
+              conversationActor={activeConversationActor}
+              conversationNodeAnimation={activeNode?.animation}
+              controlsLocked={activeNode !== null}
+              onConversationStart={handleConversationStart}
+            />
           ) : (
-            <WorkshopScene onCameraQuaternionChange={setWorkshopCameraQuaternion} />
+            <WorkshopScene
+              snakeAction={workshopSnakeAction}
+              wireframe={workshopSnakeWireframe}
+              onCameraQuaternionChange={setWorkshopCameraQuaternion}
+            />
           )}
         </Suspense>
       </Canvas>
@@ -1097,7 +1152,7 @@ export function App() {
       {activeNode && sceneMode === "grasslands" ? (
         <div className="dialog-shell">
           <div className="dialog-card">
-            <div className="dialog-name">Rabbit</div>
+            <div className="dialog-name">{activeConversation?.name ?? "Conversation"}</div>
             <p className="dialog-text">{activeNode.text}</p>
             <div className="dialog-options">
               {activeNode.options?.map((option, index) => (
@@ -1120,6 +1175,26 @@ export function App() {
           <div className="workshop-hud">
             <div className="workshop-title">Workshop Camera</div>
             <p className="workshop-help">Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.</p>
+            <div className="workshop-controls">
+              {(["slither", "idle", "coil", "spring"] as WorkshopSnakeAction[]).map((action) => (
+                <button
+                  key={action}
+                  className={`workshop-control${workshopSnakeAction === action ? " is-active" : ""}`}
+                  type="button"
+                  onClick={() => setWorkshopSnakeAction(action)}
+                >
+                  {action}
+                </button>
+              ))}
+            </div>
+            <label className="workshop-toggle">
+              <input
+                checked={workshopSnakeWireframe}
+                type="checkbox"
+                onChange={(event) => setWorkshopSnakeWireframe(event.target.checked)}
+              />
+              <span>Wireframe snake</span>
+            </label>
           </div>
           <div className="workshop-gizmo">
             <Canvas className="workshop-gizmo-canvas" camera={{ position: [0, 0, 4], fov: 32, near: 0.1, far: 20 }}>

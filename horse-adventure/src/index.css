@@ -112,6 +112,41 @@ body {
   line-height: 1.4;
 }
 
+.workshop-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+  pointer-events: auto;
+}
+
+.workshop-control {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef6ff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.45rem 0.8rem;
+}
+
+.workshop-control.is-active {
+  background: rgba(255, 143, 209, 0.26);
+  border-color: rgba(255, 143, 209, 0.68);
+}
+
+.workshop-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  pointer-events: auto;
+}
+
+.workshop-toggle input {
+  accent-color: #ff8fd1;
+}
+
 .workshop-gizmo {
   position: absolute;
   top: 1rem;

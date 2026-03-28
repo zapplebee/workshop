@@ -1,0 +1,68 @@
+actor: snake
+name: Snake
+start: greeting
+nodes:
+  greeting:
+    text: "The snake lifts its square head. 'Easy, hooves. The grass is listening.'"
+    animation: coil
+    options:
+      - label: "Hello, snake"
+        next: hello
+      - label: "Why are you coiled up?"
+        next: strike
+      - label: "Sorry to bother you"
+        next: apology
+  hello:
+    text: "'Polite for a horse,' the snake says. 'I like that.'"
+    animation: idle
+    options:
+      - label: "What do you do here?"
+        next: watch
+      - label: "Can you teach me to be sneaky?"
+        next: sneaky
+  strike:
+    text: "'A coil keeps the spring loaded,' the snake says. 'Stillness first, then motion.'"
+    animation: spring
+    options:
+      - label: "That makes sense"
+        next: watch
+      - label: "Show me"
+        next: show
+  watch:
+    text: "'I patrol the meadow edge,' the snake replies. 'Too much stomping and the whole place loses its shape.'"
+    animation: slither
+    options:
+      - label: "I'll tread lighter"
+        next: thanks
+      - label: "The meadow has a shape?"
+        next: shape
+  sneaky:
+    text: "'Start by moving only when it matters,' says the snake. 'The wind wastes plenty of motion for all of us.'"
+    animation: slither
+    options:
+      - label: "I'll practice"
+        next: thanks
+  show:
+    text: "The snake tightens, then eases. 'That was the slow version.'"
+    animation: spring
+    options:
+      - label: "Impressive"
+        next: thanks
+  shape:
+    text: "'Of course,' the snake says. 'Paths, shadows, hiding places. Someone has to notice these things.'"
+    animation: coil
+    options:
+      - label: "You notice a lot"
+        next: thanks
+  apology:
+    text: "'You are bothering me only a little,' the snake says. 'That puts you above most creatures.'"
+    animation: idle
+    options:
+      - label: "I'll take it"
+        next: thanks
+  thanks:
+    text: "'Good,' says the snake. 'Now go make smaller noise.'"
+    animation: idle
+    options:
+      - label: "Goodbye"
+        end: "The snake settles back into the grass."
