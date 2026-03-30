@@ -3,10 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { Group } from "three";
 import { Horse, type HorseAction } from "../../elements/creatures/Horse";
 import type { HorseControllerProps } from "./types";
-import { getTerrainHeight } from "./terrain";
 import { HORSE_BOUNDARY_PADDING, HORSE_GROUND_OFFSET, HORSE_MOVE_SPEED, HORSE_TURN_SPEED, PLAY_AREA_RADIUS } from "./worldData";
 
-export function HorseController({ position, scale, rotationY = 0, horseRef, keysRef, controlsLocked = false, actionOverride = null, visible = true }: HorseControllerProps) {
+export function HorseController({ position, scale, rotationY = 0, horseRef, keysRef, controlsLocked = false, actionOverride = null, visible = true, terrainHeightAt }: HorseControllerProps) {
   const localGroupRef = useRef<Group>(null);
   const groupRef = horseRef ?? localGroupRef;
   const [action, setAction] = useState<HorseAction>(actionOverride ?? "stand");
@@ -45,7 +44,7 @@ export function HorseController({ position, scale, rotationY = 0, horseRef, keys
       group.position.z = nextZ;
     }
 
-    group.position.y = getTerrainHeight(group.position.x, group.position.z) + HORSE_GROUND_OFFSET;
+    group.position.y = terrainHeightAt(group.position.x, group.position.z) + HORSE_GROUND_OFFSET;
   });
 
   useFrame(() => {
@@ -62,8 +61,8 @@ export function HorseController({ position, scale, rotationY = 0, horseRef, keys
       return;
     }
 
-    group.position.y = getTerrainHeight(group.position.x, group.position.z) + HORSE_GROUND_OFFSET;
-  }, [groupRef]);
+    group.position.y = terrainHeightAt(group.position.x, group.position.z) + HORSE_GROUND_OFFSET;
+  }, [groupRef, terrainHeightAt]);
 
   return (
     <group ref={groupRef} position={position} rotation={[0, rotationY, 0]} scale={scale}>

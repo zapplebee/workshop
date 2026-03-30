@@ -54,4 +54,5 @@ export type HorseControllerProps = {
   controlsLocked?: boolean;
   actionOverride?: import("../../elements/creatures/Horse").HorseAction | null;
   visible?: boolean;
+  terrainHeightAt: (x: number, z: number) => number;
 };

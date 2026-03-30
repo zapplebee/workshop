@@ -9,11 +9,9 @@ import { Owl, type OwlAction } from "../../elements/creatures/Owl";
 import { Rabbit } from "../../elements/creatures/Rabbit";
 import { Robin, type RobinAction } from "../../elements/creatures/Robin";
 import { Snake, type SnakeAction } from "../../elements/creatures/Snake";
-import { CanyonRing } from "../../elements/fixtures/CanyonRing";
 import { Cloud } from "../../elements/fixtures/Cloud";
 import { Creek } from "../../elements/fixtures/Creek";
 import { GrassClump } from "../../elements/fixtures/GrassClump";
-import { Hill } from "../../elements/fixtures/Hill";
 import { Carrot } from "../../elements/items/Carrot";
 import { CowboyHat } from "../../elements/items/CowboyHat";
 import type { HorseAction } from "../../elements/creatures/Horse";
@@ -23,7 +21,7 @@ import { CameraRig } from "./CameraRig";
 import { HorseController } from "./HorseController";
 import { InteractionController } from "./InteractionController";
 import { accentPlantInstances, arenaGrassInstances, plantInstances } from "./grass";
-import { getTerrainHeight } from "./terrain";
+import { useTerrainGeometry, useTerrainSampler } from "./terrain";
 import type { CameraOverride, GrassInstance, InteractionTarget, WorldPickup } from "./types";
 import { useCameraMode } from "./useCameraMode";
 import { useMovementKeys } from "./useMovementKeys";
@@ -34,14 +32,9 @@ import {
   cardinalPosition,
   donkeyPosition,
   owlPosition,
-  CANYON_SEGMENTS,
-  CANYON_WALL_HEIGHT,
-  CANYON_WALL_THICKNESS,
   clouds,
-  hills,
   horses,
   mousePosition,
-  PLAY_AREA_RADIUS,
   rabbitPosition,
   robinPosition,
   snakePosition,
@@ -108,6 +101,9 @@ export function GrasslandsWorld({
   const horseRef = useRef<Group>(null);
   const cameraMode = useCameraMode();
   const keysRef = useMovementKeys();
+  const terrainSampler = useTerrainSampler();
+  const terrainGeometry = useTerrainGeometry(terrainSampler);
+  const terrainHeightAt = terrainSampler.sampleHeight;
   const grassItems = useMemo<GrassInstance[]>(() => [
     ...accentPlantInstances,
     ...arenaGrassInstances,
@@ -182,10 +178,10 @@ export function GrasslandsWorld({
 
     return [
       target.position[0],
-      getTerrainHeight(target.position[0], target.position[2]),
+      terrainHeightAt(target.position[0], target.position[2]),
       target.position[2],
     ];
-  }, [conversationActive, interactables, nearestInteractionId]);
+  }, [conversationActive, interactables, nearestInteractionId, terrainHeightAt]);
 
   const handleInteract = (target: InteractionTarget) => {
     if (target.kind === "rabbit") {
@@ -290,8 +286,6 @@ export function GrasslandsWorld({
 
       <Creek position={[-18, 0.01, 34]} rotationY={-0.08} scale={1} />
 
-      <CanyonRing innerRadius={PLAY_AREA_RADIUS} wallThickness={CANYON_WALL_THICKNESS} wallHeight={CANYON_WALL_HEIGHT} segments={CANYON_SEGMENTS} />
-
       {horses.map((horse, index) => (
         <HorseController
           key={`horse-${index}`}
@@ -300,50 +294,47 @@ export function GrasslandsWorld({
           controlsLocked={controlsLocked}
           keysRef={keysRef}
           horseRef={index === 0 ? horseRef : undefined}
+          terrainHeightAt={terrainHeightAt}
           visible={index !== 0 || cameraMode !== "firstPerson" || conversationActive}
         />
       ))}
 
-      <group position={[snakePosition[0], getTerrainHeight(snakePosition[0], snakePosition[2]) + 0.02, snakePosition[2]]} rotation={[0, 0.22, 0]}>
+      <group position={[snakePosition[0], terrainHeightAt(snakePosition[0], snakePosition[2]) + 0.02, snakePosition[2]]} rotation={[0, 0.22, 0]}>
         <Snake action={snakeAction} highlighted={false} showSkeleton={false} wireframe={false} />
       </group>
 
-      <group position={[mousePosition[0], getTerrainHeight(mousePosition[0], mousePosition[2]) + 0.02, mousePosition[2]]} rotation={[0, -0.18, 0]} scale={0.62}>
+      <group position={[mousePosition[0], terrainHeightAt(mousePosition[0], mousePosition[2]) + 0.02, mousePosition[2]]} rotation={[0, -0.18, 0]} scale={0.62}>
         <Mouse action={mouseAction} highlighted={false} showSkeleton={false} wireframe={false} />
       </group>
 
-      <group position={[robinPosition[0], getTerrainHeight(robinPosition[0], robinPosition[2]) + 0.02, robinPosition[2]]} rotation={[0, 0.4, 0]} scale={0.72}>
+      <group position={[robinPosition[0], terrainHeightAt(robinPosition[0], robinPosition[2]) + 0.02, robinPosition[2]]} rotation={[0, 0.4, 0]} scale={0.72}>
         <Robin action={robinAction} highlighted={false} showSkeleton={false} wireframe={false} />
       </group>
 
-      <group position={[cardinalPosition[0], getTerrainHeight(cardinalPosition[0], cardinalPosition[2]) + 0.02, cardinalPosition[2]]} rotation={[0, -2.5, 0]} scale={0.74}>
+      <group position={[cardinalPosition[0], terrainHeightAt(cardinalPosition[0], cardinalPosition[2]) + 0.02, cardinalPosition[2]]} rotation={[0, -2.5, 0]} scale={0.74}>
         <Cardinal action={cardinalAction} highlighted={false} showSkeleton={false} wireframe={false} />
       </group>
 
-      <group position={[donkeyPosition[0], getTerrainHeight(donkeyPosition[0], donkeyPosition[2]) + 0.02, donkeyPosition[2]]} rotation={[0, 0.52, 0]} scale={0.88}>
+      <group position={[donkeyPosition[0], terrainHeightAt(donkeyPosition[0], donkeyPosition[2]) + 0.02, donkeyPosition[2]]} rotation={[0, 0.52, 0]} scale={0.88}>
         <Donkey action={donkeyAction} highlighted={false} showSkeleton={false} wireframe={false} />
       </group>
 
-      <group position={[antagonistHorsePosition[0], getTerrainHeight(antagonistHorsePosition[0], antagonistHorsePosition[2]) + 0.02, antagonistHorsePosition[2]]} rotation={[0, -2.2, 0]} scale={1.02}>
+      <group position={[antagonistHorsePosition[0], terrainHeightAt(antagonistHorsePosition[0], antagonistHorsePosition[2]) + 0.02, antagonistHorsePosition[2]]} rotation={[0, -2.2, 0]} scale={1.02}>
         <AntagonistHorse action={antagonistHorseAction} showSkeleton={false} wireframe={false} />
       </group>
 
-      <group position={[owlPosition[0], getTerrainHeight(owlPosition[0], owlPosition[2]) + 0.02, owlPosition[2]]} rotation={[0, -0.4, 0]} scale={1.06}>
+      <group position={[owlPosition[0], terrainHeightAt(owlPosition[0], owlPosition[2]) + 0.02, owlPosition[2]]} rotation={[0, -0.4, 0]} scale={1.06}>
         <Owl action={owlAction} highlighted={false} showSkeleton={false} wireframe={false} />
       </group>
 
-      <Rabbit {...rabbit} highlighted={false} terrainHeightAt={getTerrainHeight} />
+      <Rabbit {...rabbit} highlighted={false} terrainHeightAt={terrainHeightAt} />
 
       {interactionIndicatorPosition ? <InteractionIndicator position={interactionIndicatorPosition} /> : null}
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[700, 700]} />
+        <primitive object={terrainGeometry} attach="geometry" />
         <meshStandardMaterial color="#a9ca8a" roughness={1} flatShading />
       </mesh>
-
-      {hills.map((hill, index) => (
-        <Hill key={`hill-${index}`} {...hill} />
-      ))}
 
       {grassItems.map((plant) => (
         <GrassClump key={plant.id} {...plant} highlighted={plant.id === nearestInteractionId} />
@@ -353,13 +344,13 @@ export function GrasslandsWorld({
         item.itemId === "cowboy-hat" ? (
           <CowboyHat
             key={item.id}
-            position={[item.position[0], getTerrainHeight(item.position[0], item.position[2]) + 0.02, item.position[2]]}
+            position={[item.position[0], terrainHeightAt(item.position[0], item.position[2]) + 0.02, item.position[2]]}
             highlighted={false}
           />
         ) : (
           <Carrot
             key={item.id}
-            position={[item.position[0], getTerrainHeight(item.position[0], item.position[2]) + 0.02, item.position[2]]}
+            position={[item.position[0], terrainHeightAt(item.position[0], item.position[2]) + 0.02, item.position[2]]}
             highlighted={false}
           />
         )
