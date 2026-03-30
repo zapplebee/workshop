@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from
 import "./index.css";
 import { CleanroomScene } from "./scenes/CleanroomScene";
 import { GrasslandsScene } from "./scenes/GrasslandsScene";
+import { UploadScene } from "./scenes/UploadScene";
 import { WorkshopGizmoScene } from "./features/cleanroom/WorkshopGizmoScene";
 import { WorkshopScene } from "./features/cleanroom/WorkshopScene";
 import { useCleanroomState } from "./features/cleanroom/useCleanroomState";
@@ -138,6 +139,7 @@ function AppRoutes() {
             activeNode={activeSceneNode}
             activeConversationName={activeConversation?.name}
             onGoToCleanroom={() => navigate(`/cleanroom/${selectedEntry.id}`)}
+            onGoToUpload={() => navigate("/upload")}
             inventoryOpen={inventory.isOpen}
             inventorySupplies={inventory.stackableEntries}
             inventoryKeyItems={inventory.keyEntries}
@@ -167,8 +169,13 @@ function AppRoutes() {
             onWireframeChange={setSelectedWireframe}
             wireframeLabel={selectedControls?.wireframeLabel ?? ""}
             onGoToGrasslands={() => navigate("/grasslands")}
+            onGoToUpload={() => navigate("/upload")}
           />
         }
+      />
+      <Route
+        path="upload"
+        element={<UploadScene onGoToGrasslands={() => navigate("/grasslands")} onGoToCleanroom={() => navigate(`/cleanroom/${selectedEntry.id}`)} />}
       />
       <Route path="cleanroom" element={<Navigate to="/cleanroom/mouse" replace />} />
       <Route path="*" element={<Navigate to="/grasslands" replace />} />

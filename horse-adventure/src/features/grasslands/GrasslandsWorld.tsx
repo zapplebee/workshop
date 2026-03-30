@@ -284,7 +284,7 @@ export function GrasslandsWorld({
         <Cloud key={`cloud-${index}`} {...cloud} />
       ))}
 
-      <Creek position={[-18, 0.01, 34]} rotationY={-0.08} scale={1} />
+      <Creek position={[-18, terrainHeightAt(-18, 34) + 0.01, 34]} rotationY={-0.08} scale={1} />
 
       {horses.map((horse, index) => (
         <HorseController
@@ -337,7 +337,12 @@ export function GrasslandsWorld({
       </mesh>
 
       {grassItems.map((plant) => (
-        <GrassClump key={plant.id} {...plant} highlighted={plant.id === nearestInteractionId} />
+        <GrassClump
+          key={plant.id}
+          {...plant}
+          position={[plant.position[0], terrainHeightAt(plant.position[0], plant.position[2]), plant.position[2]]}
+          highlighted={plant.id === nearestInteractionId}
+        />
       ))}
 
       {pickupItems.map((item) => (

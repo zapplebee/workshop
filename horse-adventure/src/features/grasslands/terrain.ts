@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { PlaneGeometry } from "three";
-import heightmapUrl from "../../assets/terrain/box-canyon-heightmap.svg";
 import { CANYON_WALL_HEIGHT } from "./worldData";
+
+const terrainHeightmapUrl = "/uploads/download.png";
 
 const TERRAIN_WORLD_SIZE = 440;
 const TERRAIN_SEGMENTS = 220;
@@ -85,7 +86,7 @@ export function useTerrainSampler() {
       setSampler(createTerrainSampler(nextImageData.data, image.width, image.height));
     };
 
-    image.src = heightmapUrl;
+    image.src = terrainHeightmapUrl;
 
     return () => {
       cancelled = true;

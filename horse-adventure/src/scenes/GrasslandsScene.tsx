@@ -82,6 +82,7 @@ type GrasslandsSceneProps = {
   onConversationOption: (option: ConversationOption) => void;
   onCloseConversation: () => void;
   onGoToCleanroom: () => void;
+  onGoToUpload: () => void;
   inventoryOpen: boolean;
   inventorySupplies: InventoryDisplayEntry[];
   inventoryKeyItems: InventoryDisplayEntry[];
@@ -97,6 +98,7 @@ export function GrasslandsScene({
   onConversationOption,
   onCloseConversation,
   onGoToCleanroom,
+  onGoToUpload,
   inventoryOpen,
   inventorySupplies,
   inventoryKeyItems,
@@ -173,6 +175,9 @@ export function GrasslandsScene({
           </button>
           <button className="scene-nav-button" type="button" onClick={onGoToCleanroom}>
             Cleanroom
+          </button>
+          <button className="scene-nav-button" type="button" onClick={onGoToUpload}>
+            Upload
           </button>
         </div>
 

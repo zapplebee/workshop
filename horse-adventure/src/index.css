@@ -417,6 +417,125 @@ body {
   display: block;
 }
 
+.upload-shell {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.upload-panel {
+  width: min(46rem, calc(100vw - 3rem));
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 1.2rem;
+  background: rgba(17, 31, 56, 0.7);
+  box-shadow: 0 1rem 2rem rgba(15, 25, 42, 0.24);
+  color: #eef6ff;
+  padding: 1.1rem 1.2rem 1.2rem;
+}
+
+.upload-nav {
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.upload-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.92;
+  text-transform: uppercase;
+}
+
+.upload-help,
+.upload-status,
+.upload-file-meta,
+.upload-empty,
+.upload-file-path {
+  color: rgba(238, 246, 255, 0.78);
+}
+
+.upload-help {
+  margin: 0.45rem 0 0;
+}
+
+.upload-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.upload-picker,
+.upload-submit {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef6ff;
+  font: inherit;
+  padding: 0.7rem 0.9rem;
+}
+
+.upload-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.upload-picker input {
+  color: #eef6ff;
+}
+
+.upload-submit {
+  cursor: pointer;
+}
+
+.upload-submit:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.upload-status {
+  margin-top: 0.85rem;
+}
+
+.upload-list-shell {
+  margin-top: 1.1rem;
+}
+
+.upload-list-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.78;
+  text-transform: uppercase;
+}
+
+.upload-list {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.7rem;
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.75rem 0.85rem;
+}
+
+.upload-file-name {
+  font-weight: 700;
+}
+
+.upload-file-path {
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+}
+
 @media (prefers-reduced-motion) {
   *,
   ::before,
@@ -457,5 +576,15 @@ body {
   .dialog-card {
     min-height: 8.8rem;
     padding: 0.9rem 1rem 1rem;
+  }
+
+  .upload-panel {
+    width: min(100%, calc(100vw - 1.5rem));
+    padding: 0.95rem 1rem 1rem;
+  }
+
+  .upload-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

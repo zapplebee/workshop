@@ -16,6 +16,7 @@ type CleanroomSceneProps<Action extends string> = {
   onWireframeChange: (checked: boolean) => void;
   wireframeLabel: string;
   onGoToGrasslands: () => void;
+  onGoToUpload: () => void;
 };
 
 export function CleanroomScene<Action extends string>({
@@ -33,6 +34,7 @@ export function CleanroomScene<Action extends string>({
   onWireframeChange,
   wireframeLabel,
   onGoToGrasslands,
+  onGoToUpload,
 }: CleanroomSceneProps<Action>) {
   return (
     <div className="scene-shell">
@@ -47,6 +49,9 @@ export function CleanroomScene<Action extends string>({
           </button>
           <button className="scene-nav-button is-active" type="button">
             Cleanroom
+          </button>
+          <button className="scene-nav-button" type="button" onClick={onGoToUpload}>
+            Upload
           </button>
         </div>
         <div className="workshop-title">{title}</div>
