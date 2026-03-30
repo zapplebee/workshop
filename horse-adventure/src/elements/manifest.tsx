@@ -8,11 +8,9 @@ import { Owl, type OwlAction } from "./creatures/Owl";
 import { Robin, type RobinAction } from "./creatures/Robin";
 import { Rabbit } from "./creatures/Rabbit";
 import { Snake, type SnakeAction } from "./creatures/Snake";
-import { CanyonRing } from "./fixtures/CanyonRing";
 import { Cloud } from "./fixtures/Cloud";
 import { Creek } from "./fixtures/Creek";
 import { GrassClump } from "./fixtures/GrassClump";
-import { Hill } from "./fixtures/Hill";
 import { Carrot } from "./items/Carrot";
 import { CowboyHat } from "./items/CowboyHat";
 
@@ -164,22 +162,10 @@ export const elementManifest = [
     render: () => <Cloud position={[0, 1.4, 0]} scale={2.3} drift={0.2} />,
   },
   {
-    id: "hill",
-    name: "Hill",
-    category: "fixtures",
-    render: () => <Hill position={[0, 0.2, 0]} scale={[3.2, 1.6, 2.4]} tint="#8fb26f" />,
-  },
-  {
     id: "grass-clump",
     name: "Grass Clump",
     category: "fixtures",
     render: () => <GrassClump position={[0, 0, 0]} scale={2.6} />,
-  },
-  {
-    id: "canyon-ring",
-    name: "Canyon Ring",
-    category: "fixtures",
-    render: () => <CanyonRing innerRadius={5} wallThickness={1.4} wallHeight={4.5} segments={20} />,
   },
   {
     id: "creek",

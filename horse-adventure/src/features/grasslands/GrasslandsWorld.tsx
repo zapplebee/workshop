@@ -333,7 +333,7 @@ export function GrasslandsWorld({
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <primitive object={terrainGeometry} attach="geometry" />
-        <meshStandardMaterial color="#a9ca8a" roughness={1} flatShading />
+        <meshStandardMaterial roughness={1} flatShading vertexColors />
       </mesh>
 
       {grassItems.map((plant) => (

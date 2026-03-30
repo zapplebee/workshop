@@ -18,9 +18,10 @@ This feature directory owns the playable world logic for `/grasslands`.
   - wires creatures, pickups, terrain fixtures, interaction indicator, and camera override state
 - `worldData.ts`
   - placement data and core world tuning values
-  - includes plants, hills, clouds, creature positions, pickup positions, and canyon constants
+  - includes plants, clouds, creature positions, pickup positions, terrain tuning, and canyon scale constants
 - `terrain.ts`
-  - terrain height sampling based on hill data
+  - heightmap-driven terrain sampling and mesh generation
+  - lightweight footprint sampling helpers for stable character grounding
 - `InteractionController.tsx`
   - nearest-target detection
   - keyboard/mobile interaction triggering
@@ -93,3 +94,4 @@ Mobile:
 - keep world placements and tuning in `worldData.ts` instead of scattering them through scene code
 - prefer extending the existing pickup and interaction model rather than inventing actor-specific one-off input paths
 - when changing dialogue framing, test against the bottom black dialogue bar, especially on mobile viewport sizes
+- keep player grounding compute-light: prefer heightmap sampling and small fixed footprints over per-frame terrain raycasts unless arbitrary mesh collisions become necessary

@@ -1,33 +1,6 @@
 import type { HorseConfig } from "./worldData.types";
 import type { PlantProps } from "./types";
 import type { CloudProps } from "../../elements/fixtures/Cloud";
-import type { HillProps } from "../../elements/fixtures/Hill";
-
-function createCanyonEdgeHills(): HillProps[] {
-  const hills: HillProps[] = [];
-  const ridgeCount = 28;
-  const ridgeRadius = 188;
-
-  for (let index = 0; index < ridgeCount; index += 1) {
-    const angle = (index / ridgeCount) * Math.PI * 2;
-    const radiusOffset = index % 2 === 0 ? -4 : 3;
-    const radius = ridgeRadius + radiusOffset;
-    const x = Math.cos(angle) * radius;
-    const z = Math.sin(angle) * radius;
-    const width = 16 + (index % 3) * 2.8;
-    const height = 4.8 + (index % 4) * 0.7;
-    const depth = 10 + (index % 5) * 1.6;
-    const tint = index % 3 === 0 ? "#87ab63" : index % 3 === 1 ? "#7ea45c" : "#94b870";
-
-    hills.push({
-      position: [x, -2.8 - (index % 3) * 0.18, z],
-      scale: [width, height, depth],
-      tint,
-    });
-  }
-
-  return hills;
-}
 
 export const plants: PlantProps[] = [
   { position: [-5.3, 0, 1.8], scale: 1, lean: -0.2, tint: "#85b668" },
@@ -53,14 +26,6 @@ export const accentPlants: PlantProps[] = [
   { position: [4.8, 0, 1.5], scale: 0.4, lean: 0.06, tint: "#7fab5c" },
   { position: [-3.4, 0, -1.1], scale: 0.36, lean: 0.1, tint: "#8ebf68" },
   { position: [1.9, 0, -2.8], scale: 0.38, lean: -0.08, tint: "#7ea95f" },
-];
-
-export const hills: HillProps[] = [
-  { position: [-8.3, -0.2, -15], scale: [8.2, 2.6, 6.8], tint: "#8fb26f" },
-  { position: [8.2, -0.28, -16], scale: [7.2, 2.3, 6.1], tint: "#85a95f" },
-  { position: [0.5, -0.55, -22], scale: [15.5, 3.5, 10.6], tint: "#7f9f56" },
-  { position: [0, -0.82, -9], scale: [11.2, 1.45, 4.6], tint: "#9cbc7b" },
-  ...createCanyonEdgeHills(),
 ];
 
 export const clouds: CloudProps[] = [
@@ -106,13 +71,15 @@ export const horses: HorseConfig[] = [
 ];
 
 export const PLAY_AREA_RADIUS = 200;
-export const CANYON_WALL_THICKNESS = 24;
 export const CANYON_WALL_HEIGHT = 36;
-export const CANYON_SEGMENTS = 24;
 export const HORSE_MOVE_SPEED = 8;
 export const HORSE_TURN_SPEED = 2.4;
 export const HORSE_BOUNDARY_PADDING = 8;
-export const HORSE_GROUND_OFFSET = 0.02;
+export const HORSE_GROUND_CLEARANCE = 0.22;
+export const HORSE_GROUND_SNAP_SPEED = 10;
+export const HORSE_FOOTPRINT_FRONT = 0.9;
+export const HORSE_FOOTPRINT_REAR = 0.7;
+export const HORSE_FOOTPRINT_HALF_WIDTH = 0.28;
 export const INTERACTION_RANGE = 4.5;
 export const INTERACTION_CELL_SIZE = 12;
 export const INTERACTION_CHECK_INTERVAL = 0.25;

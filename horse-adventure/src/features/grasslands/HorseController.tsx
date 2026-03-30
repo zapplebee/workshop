@@ -3,12 +3,38 @@ import { useEffect, useRef, useState } from "react";
 import { Group } from "three";
 import { Horse, type HorseAction } from "../../elements/creatures/Horse";
 import type { HorseControllerProps } from "./types";
-import { HORSE_BOUNDARY_PADDING, HORSE_GROUND_OFFSET, HORSE_MOVE_SPEED, HORSE_TURN_SPEED, PLAY_AREA_RADIUS } from "./worldData";
+import { sampleTerrainFootprint } from "./terrain";
+import {
+  HORSE_BOUNDARY_PADDING,
+  HORSE_FOOTPRINT_FRONT,
+  HORSE_FOOTPRINT_HALF_WIDTH,
+  HORSE_FOOTPRINT_REAR,
+  HORSE_GROUND_CLEARANCE,
+  HORSE_GROUND_SNAP_SPEED,
+  HORSE_MOVE_SPEED,
+  HORSE_TURN_SPEED,
+  PLAY_AREA_RADIUS,
+} from "./worldData";
 
 export function HorseController({ position, scale, rotationY = 0, horseRef, keysRef, controlsLocked = false, actionOverride = null, visible = true, terrainHeightAt }: HorseControllerProps) {
   const localGroupRef = useRef<Group>(null);
   const groupRef = horseRef ?? localGroupRef;
   const [action, setAction] = useState<HorseAction>(actionOverride ?? "stand");
+
+  const applyGrounding = (group: Group, delta: number) => {
+    const footprint = sampleTerrainFootprint(
+      terrainHeightAt,
+      group.position.x,
+      group.position.z,
+      group.rotation.y,
+      HORSE_FOOTPRINT_FRONT,
+      HORSE_FOOTPRINT_REAR,
+      HORSE_FOOTPRINT_HALF_WIDTH,
+    );
+    const targetY = footprint.supportHeight + HORSE_GROUND_CLEARANCE;
+    const smoothing = 1 - Math.exp(-delta * HORSE_GROUND_SNAP_SPEED);
+    group.position.y += (targetY - group.position.y) * smoothing;
+  };
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -21,6 +47,7 @@ export function HorseController({ position, scale, rotationY = 0, horseRef, keys
     const move = (keysRef.current.forward ? 1 : 0) - (keysRef.current.backward ? 1 : 0);
 
     if (controlsLocked || (turn === 0 && move === 0)) {
+      applyGrounding(group, delta);
       return;
     }
 
@@ -44,7 +71,7 @@ export function HorseController({ position, scale, rotationY = 0, horseRef, keys
       group.position.z = nextZ;
     }
 
-    group.position.y = terrainHeightAt(group.position.x, group.position.z) + HORSE_GROUND_OFFSET;
+    applyGrounding(group, delta);
   });
 
   useFrame(() => {
@@ -61,7 +88,16 @@ export function HorseController({ position, scale, rotationY = 0, horseRef, keys
       return;
     }
 
-    group.position.y = terrainHeightAt(group.position.x, group.position.z) + HORSE_GROUND_OFFSET;
+    const footprint = sampleTerrainFootprint(
+      terrainHeightAt,
+      group.position.x,
+      group.position.z,
+      group.rotation.y,
+      HORSE_FOOTPRINT_FRONT,
+      HORSE_FOOTPRINT_REAR,
+      HORSE_FOOTPRINT_HALF_WIDTH,
+    );
+    group.position.y = footprint.supportHeight + HORSE_GROUND_CLEARANCE;
   }, [groupRef, terrainHeightAt]);
 
   return (

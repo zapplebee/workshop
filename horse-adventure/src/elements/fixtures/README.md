@@ -5,9 +5,8 @@ This directory contains environmental assets and non-creature world pieces.
 Examples:
 
 - `Cloud`
-- `Hill`
 - `GrassClump`
-- `CanyonRing`
+- `Creek`
 
 ## Conventions
 
