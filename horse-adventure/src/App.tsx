@@ -17,6 +17,7 @@ import { useWorldFlags } from "./features/world-flags/useWorldFlags";
 
 function AppRoutes() {
   const [workshopCameraQuaternion, setWorkshopCameraQuaternion] = useState<[number, number, number, number]>([0, 0, 0, 1]);
+  const [mobileInteractSignal, setMobileInteractSignal] = useState(0);
   const sceneMode = useSceneRouting();
   const location = useLocation();
   const navigate = useNavigate();
@@ -102,6 +103,7 @@ function AppRoutes() {
       conversationActor={activeConversationActor}
       conversationNodeAnimation={activeNode?.animation}
       controlsLocked={activeNode !== null}
+      interactSignal={mobileInteractSignal}
       onCollectItem={(itemId: InventoryItemId) => inventory.addItem(itemId, 1).added}
       onConversationStart={handleConversationStart}
     />
@@ -135,12 +137,14 @@ function AppRoutes() {
             sceneContent={grasslandsContent}
             activeNode={activeSceneNode}
             activeConversationName={activeConversation?.name}
+            onGoToCleanroom={() => navigate(`/cleanroom/${selectedEntry.id}`)}
             inventoryOpen={inventory.isOpen}
             inventorySupplies={inventory.stackableEntries}
             inventoryKeyItems={inventory.keyEntries}
             debugFlags={worldFlags.flags}
             onConversationOption={handleConversationOption}
             onCloseConversation={closeConversation}
+            onMobileInteract={() => setMobileInteractSignal((current) => current + 1)}
             onToggleInventory={inventory.toggle}
           />
         }
@@ -162,6 +166,7 @@ function AppRoutes() {
             wireframe={selectedWireframe}
             onWireframeChange={setSelectedWireframe}
             wireframeLabel={selectedControls?.wireframeLabel ?? ""}
+            onGoToGrasslands={() => navigate("/grasslands")}
           />
         }
       />

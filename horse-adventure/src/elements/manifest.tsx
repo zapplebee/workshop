@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
+import { AntagonistHorse, type AntagonistHorseAction } from "./creatures/AntagonistHorse";
 import { Cardinal, type CardinalAction } from "./creatures/Cardinal";
+import { Donkey, type DonkeyAction } from "./creatures/Donkey";
 import { Horse, type HorseAction } from "./creatures/Horse";
 import { Mouse, type MouseAction } from "./creatures/Mouse";
+import { Owl, type OwlAction } from "./creatures/Owl";
 import { Robin, type RobinAction } from "./creatures/Robin";
 import { Rabbit } from "./creatures/Rabbit";
 import { Snake, type SnakeAction } from "./creatures/Snake";
@@ -36,6 +39,19 @@ export type ElementManifestEntry<Action extends string = string> = {
 
 export const elementManifest = [
   {
+    id: "antagonist-horse",
+    name: "Antagonist Horse",
+    category: "creatures",
+    controls: {
+      title: "Antagonist Horse Workshop",
+      help: "Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.",
+      actions: ["stand", "walk", "eat", "jiggle_ears", "strut", "snort", "stomp"] as const,
+      defaultAction: "stand",
+      wireframeLabel: "Wireframe antagonist horse",
+    },
+    render: ({ action = "stand", wireframe }) => <AntagonistHorse action={action as AntagonistHorseAction} showSkeleton={wireframe} wireframe={wireframe} />,
+  },
+  {
     id: "cardinal",
     name: "Cardinal",
     category: "creatures",
@@ -60,6 +76,19 @@ export const elementManifest = [
       wireframeLabel: "Wireframe horse",
     },
     render: ({ action = "stand", wireframe }) => <Horse action={action as HorseAction} showSkeleton={wireframe} wireframe={wireframe} />,
+  },
+  {
+    id: "donkey",
+    name: "Donkey",
+    category: "creatures",
+    controls: {
+      title: "Donkey Workshop",
+      help: "Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.",
+      actions: ["stand", "walk", "eat", "jiggle_ears", "blush"] as const,
+      defaultAction: "stand",
+      wireframeLabel: "Wireframe donkey",
+    },
+    render: ({ action = "stand", wireframe }) => <Donkey action={action as DonkeyAction} showSkeleton={wireframe} wireframe={wireframe} />,
   },
   {
     id: "mouse",
@@ -99,6 +128,19 @@ export const elementManifest = [
       wireframeLabel: "Wireframe rabbit",
     },
     render: ({ wireframe }) => <Rabbit id="preview-rabbit" position={[0, 0, 0]} wireframe={wireframe} />,
+  },
+  {
+    id: "owl",
+    name: "Owl",
+    category: "creatures",
+    controls: {
+      title: "Owl Workshop",
+      help: "Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.",
+      actions: ["idle", "blink", "swivel", "flap"] as const,
+      defaultAction: "idle",
+      wireframeLabel: "Wireframe owl",
+    },
+    render: ({ action = "idle", wireframe }) => <Owl action={action as OwlAction} showSkeleton={wireframe} wireframe={wireframe} />,
   },
   {
     id: "robin",

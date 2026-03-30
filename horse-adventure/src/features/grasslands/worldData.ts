@@ -49,6 +49,9 @@ export const mousePosition: [number, number, number] = [2.8, 0, -10.4];
 export const rabbitPosition: [number, number, number] = [13.8, 0, -6.8];
 export const robinPosition: [number, number, number] = [-22, 0, 18];
 export const cardinalPosition: [number, number, number] = [24, 0, 16];
+export const donkeyPosition: [number, number, number] = [-18, 0, -14];
+export const antagonistHorsePosition: [number, number, number] = [19, 0, -18];
+export const owlPosition: [number, number, number] = [-6, 0, 24];
 export const carrotPositions: Array<[number, number, number]> = [
   [-10.5, 0, 8.8],
   [-9.2, 0, 9.6],

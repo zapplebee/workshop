@@ -1,0 +1,60 @@
+actor: antagonist-horse
+name: Antagonist Horse
+start: greeting
+nodes:
+  greeting:
+    text: "The white horse looks you over with theatrical disappointment. 'Oh good, you again. The meadow was almost tolerable.'"
+    animation: stand
+    options:
+      - label: "Nice to see you too"
+        next: rude
+      - label: "Why are you like this?"
+        next: pride
+      - label: "You seem tense"
+        next: snort
+  rude:
+    text: "He tosses his mane. 'Obviously. Someone has to maintain standards around here.'"
+    animation: strut
+    options:
+      - label: "Standards for what?"
+        next: pride
+      - label: "You just enjoy being difficult"
+        next: stomp
+  pride:
+    text: "'For presence,' he says. 'You cannot simply arrive in a field and fail to command it.'"
+    animation: strut
+    options:
+      - label: "That sounds exhausting"
+        next: snort
+      - label: "You command it by being mean?"
+        next: stomp
+  snort:
+    text: "The horse gives a sharp, offended snort. 'Mean is such an ordinary word. I prefer discerning.'"
+    animation: snort
+    options:
+      - label: "Discerningly rude"
+        next: stomp
+      - label: "You practiced that line"
+        next: practiced
+  stomp:
+    text: "He stamps the ground with a crack. 'If everyone else were less flimsy, I would not need to be so clear.'"
+    animation: stomp
+    options:
+      - label: "You are being dramatic"
+        next: practiced
+      - label: "I think you like the performance"
+        next: caught
+  practiced:
+    text: "'A little rehearsal is not a crime,' he says, chin lifting. 'Mediocrity is the crime.'"
+    animation: strut
+    options:
+      - label: "That is absurd"
+        next: caught
+      - label: "You really enjoy hearing yourself talk"
+        next: caught
+  caught:
+    text: "For a moment he almost smiles. 'If you insist on understanding me, at least do it with proper admiration.'"
+    animation: stand
+    options:
+      - label: "I will consider it"
+        end: "The antagonist horse gives a smug nod, as if he has already won the exchange."

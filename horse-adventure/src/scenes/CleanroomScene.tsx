@@ -15,6 +15,7 @@ type CleanroomSceneProps<Action extends string> = {
   wireframe: boolean;
   onWireframeChange: (checked: boolean) => void;
   wireframeLabel: string;
+  onGoToGrasslands: () => void;
 };
 
 export function CleanroomScene<Action extends string>({
@@ -31,12 +32,22 @@ export function CleanroomScene<Action extends string>({
   wireframe,
   onWireframeChange,
   wireframeLabel,
+  onGoToGrasslands,
 }: CleanroomSceneProps<Action>) {
   return (
     <div className="scene-shell">
       <Canvas shadows className="scene-canvas" dpr={[1, 1.5]} camera={{ position: [0, 6, 14], fov: 46, near: 0.1, far: 200 }}>
         <Suspense fallback={null}>{sceneContent}</Suspense>
       </Canvas>
+
+      <div className="scene-nav">
+        <button className="scene-nav-button" type="button" onClick={onGoToGrasslands}>
+          Grasslands
+        </button>
+        <button className="scene-nav-button is-active" type="button">
+          Cleanroom
+        </button>
+      </div>
 
       <div className="workshop-hud">
         <div className="workshop-title">{title}</div>

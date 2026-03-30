@@ -1,0 +1,70 @@
+actor: donkey
+name: Donkey
+start: greeting
+nodes:
+  greeting:
+    text: "The donkey glances over, then pretends not to have been watching you already. 'Oh. Hello. You found the quiet side of the meadow.'"
+    animation: stand
+    options:
+      - label: "I was hoping to find you"
+        next: found_me
+      - label: "You look lovely today"
+        next: lovely
+      - label: "Sorry, I can go"
+        next: go
+  found_me:
+    text: "The donkey's ears tilt forward. 'That is a dangerous thing to say so calmly.'"
+    animation: blush
+    options:
+      - label: "I mean it"
+        next: mean_it
+      - label: "Only a little dangerous"
+        next: tease
+  lovely:
+    text: "The donkey looks away toward the hills. 'You are being very bold for someone with grass in their mane.'"
+    animation: blush
+    options:
+      - label: "Boldness suits me"
+        next: tease
+      - label: "Then let me try again tomorrow"
+        next: tomorrow
+  go:
+    text: "'You could,' the donkey says, 'but then who would keep me company out here?'"
+    animation: jiggle_ears
+    options:
+      - label: "I can stay"
+        next: stay
+      - label: "I did not know you wanted that"
+        next: blush_confession
+  mean_it:
+    text: "A faint pink rises in the donkey's cheeks. 'Then stay near me a minute longer. I like how the meadow sounds when you arrive.'"
+    animation: blush
+    options:
+      - label: "I can do that"
+        end: "The donkey leans a little closer, trying and failing to look composed."
+  tease:
+    text: "The donkey gives you a sidelong look. 'You are lucky that I enjoy this sort of nonsense.'"
+    animation: jiggle_ears
+    options:
+      - label: "So you do enjoy it"
+        next: blush_confession
+      - label: "I am extremely lucky"
+        next: stay
+  tomorrow:
+    text: "'Tomorrow is acceptable,' the donkey says. 'But I would not object to later today, either.'"
+    animation: blush
+    options:
+      - label: "Then I will come back soon"
+        end: "The donkey watches you go with a soft, pleased expression."
+  stay:
+    text: "The donkey shifts closer, shoulder warm in the breeze. 'Good. The rest of them chatter too much. You are easier to like.'"
+    animation: stand
+    options:
+      - label: "That may be the nicest thing anyone has said to me"
+        next: blush_confession
+  blush_confession:
+    text: "The donkey exhales through their nose and smiles despite themself. 'Do not make me say everything first. But... yes. I am glad when you come by.'"
+    animation: blush
+    options:
+      - label: "Then I will keep coming by"
+        end: "The donkey's ears lift, and the quiet side of the meadow suddenly feels much warmer."

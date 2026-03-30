@@ -1,0 +1,64 @@
+actor: owl
+name: Owl
+start: greeting
+nodes:
+  greeting:
+    text: "The owl blinks once, very slowly. 'You come asking for wisdom, or are you here for wise-guy rates? Because those are different services.'"
+    animation: blink
+    options:
+      - label: "I could use some wisdom"
+        next: wisdom
+      - label: "Wise-guy rates?"
+        next: rates
+      - label: "Can I get both?"
+        next: both
+  wisdom:
+    text: "The owl swivels his head. 'Good. Real wisdom is mostly timing, silence, and knowing which fool is about to trip over his own confidence.'"
+    animation: swivel
+    options:
+      - label: "That sounds suspiciously specific"
+        next: specific
+      - label: "So you just watch everyone?"
+        next: watch
+  rates:
+    text: "'For a premium,' the owl says, 'I will insult your enemies using only accurate observations. Very upscale. Very educational.'"
+    animation: blink
+    options:
+      - label: "You seem proud of that"
+        next: proud
+      - label: "Do many take you up on it?"
+        next: watch
+  both:
+    text: "The owl gives a tiny, pleased ruffle. 'Now you are talking my language. Wisdom for the soul, wise-guy commentary for the evening.'"
+    animation: flap
+    options:
+      - label: "Start with wisdom"
+        next: wisdom
+      - label: "Start with commentary"
+        next: rates
+  specific:
+    text: "'Specificity is the foundation of quality mockery,' he says. 'Anyone can be rude. Precision takes craft.'"
+    animation: swivel
+    options:
+      - label: "That is annoyingly insightful"
+        next: proud
+  watch:
+    text: "'Naturally,' says the owl. 'I am an owl. Observation is my whole brand. The night shift practically runs itself.'"
+    animation: blink
+    options:
+      - label: "And what do you see when you look at me?"
+        next: verdict
+  proud:
+    text: "The owl settles his wings. 'Pride is such an ugly word. I prefer expertly justified self-regard.'"
+    animation: flap
+    options:
+      - label: "You and the antagonist horse would get along"
+        next: verdict
+      - label: "That is somehow worse"
+        next: verdict
+  verdict:
+    text: "The owl studies you with huge gold eyes. 'You have potential. A little earnest, a little chaotic, but not beyond editing.'"
+    animation: swivel
+    options:
+      - label: "I will take that as a compliment"
+        end: "The owl gives a slow, approving blink, which somehow still feels like he won the conversation."

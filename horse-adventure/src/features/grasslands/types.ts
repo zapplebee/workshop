@@ -29,7 +29,7 @@ export type CameraOverride = {
   targetPosition: [number, number, number];
 };
 
-export type InteractionKind = "grass" | "rabbit" | "snake" | "mouse" | "robin" | "cardinal" | "pickup";
+export type InteractionKind = "grass" | "rabbit" | "snake" | "mouse" | "robin" | "cardinal" | "donkey" | "antagonist-horse" | "owl" | "pickup";
 
 export type InteractionTarget = {
   id: string;

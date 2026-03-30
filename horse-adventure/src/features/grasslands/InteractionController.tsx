@@ -11,6 +11,7 @@ export function InteractionController({
   enabled,
   onInteract,
   onNearestChange,
+  interactSignal = 0,
 }: {
   horseRef: RefObject<Group | null>;
   keysRef: RefObject<MovementKeys>;
@@ -18,9 +19,19 @@ export function InteractionController({
   enabled: boolean;
   onInteract: (target: InteractionTarget) => void;
   onNearestChange: (id: string | null) => void;
+  interactSignal?: number;
 }) {
   const nearestIdRef = useRef<string | null>(null);
   const checkTimerRef = useRef(0);
+  const interactCooldownUntilRef = useRef(0);
+  const lastHandledInteractSignalRef = useRef(0);
+
+  const triggerInteract = (target: InteractionTarget) => {
+    interactCooldownUntilRef.current = performance.now() + 450;
+    nearestIdRef.current = null;
+    onNearestChange(null);
+    onInteract(target);
+  };
 
   const interactableGrid = useMemo(() => {
     const grid = new Map<string, InteractionTarget[]>();
@@ -49,6 +60,14 @@ export function InteractionController({
     }
 
     checkTimerRef.current = 0;
+
+    if (performance.now() < interactCooldownUntilRef.current) {
+      if (nearestIdRef.current !== null) {
+        nearestIdRef.current = null;
+        onNearestChange(null);
+      }
+      return;
+    }
 
     if (!enabled) {
       if (nearestIdRef.current !== null) {
@@ -121,7 +140,7 @@ export function InteractionController({
       const target = interactables.find((item) => item.id === nearestIdRef.current);
 
       if (target) {
-        onInteract(target);
+        triggerInteract(target);
       }
     };
 
@@ -131,6 +150,25 @@ export function InteractionController({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [interactables, onInteract]);
+
+  useEffect(() => {
+    if (
+      !enabled ||
+      interactSignal === 0 ||
+      interactSignal === lastHandledInteractSignalRef.current ||
+      nearestIdRef.current === null
+    ) {
+      return;
+    }
+
+    lastHandledInteractSignalRef.current = interactSignal;
+
+    const target = interactables.find((item) => item.id === nearestIdRef.current);
+
+    if (target) {
+      triggerInteract(target);
+    }
+  }, [enabled, interactSignal, interactables, onInteract, onNearestChange]);
 
   return null;
 }

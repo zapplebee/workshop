@@ -1,7 +1,7 @@
 import type { InventoryItemId } from "../inventory/types";
 import type { WorldFlagId } from "../world-flags/types";
 
-export type ConversationActor = "rabbit" | "snake" | "mouse" | "robin" | "cardinal";
+export type ConversationActor = "rabbit" | "snake" | "mouse" | "robin" | "cardinal" | "donkey" | "antagonist-horse" | "owl";
 
 export type ConversationInventoryAmount = {
   itemId: InventoryItemId;

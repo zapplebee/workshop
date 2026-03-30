@@ -4,17 +4,90 @@ import type { ConversationOption } from "../features/conversations/types";
 import { InventoryPanel } from "../features/inventory/InventoryPanel";
 import type { InventoryDisplayEntry } from "../features/inventory/types";
 
+function dispatchKey(code: string, type: "keydown" | "keyup") {
+  window.dispatchEvent(new KeyboardEvent(type, { code, bubbles: true }));
+}
+
+function MobileActionButton({
+  label,
+  code,
+  hold = true,
+}: {
+  label: string;
+  code: string;
+  hold?: boolean;
+}) {
+  const press = () => {
+    dispatchKey(code, "keydown");
+  };
+
+  const release = () => {
+    if (hold) {
+      dispatchKey(code, "keyup");
+    }
+  };
+
+  return (
+    <button
+      className="mobile-control-button"
+      type="button"
+      onPointerDown={(event) => {
+        event.preventDefault();
+        press();
+      }}
+      onPointerUp={(event) => {
+        event.preventDefault();
+        release();
+      }}
+      onPointerCancel={release}
+      onPointerLeave={release}
+    >
+      {label}
+    </button>
+  );
+}
+
+function MobileControls({ onInteract, disabled = false }: { onInteract: () => void; disabled?: boolean }) {
+  if (disabled) {
+    return null;
+  }
+
+  return (
+    <div className="mobile-controls" aria-label="Mobile controls">
+      <div className="mobile-controls-pad">
+        <div className="mobile-controls-row mobile-controls-row-top">
+          <MobileActionButton label="Forward" code="KeyW" />
+        </div>
+        <div className="mobile-controls-row">
+          <MobileActionButton label="Left" code="KeyA" />
+          <MobileActionButton label="Back" code="KeyS" />
+          <MobileActionButton label="Right" code="KeyD" />
+        </div>
+      </div>
+
+      <div className="mobile-controls-actions">
+        <button className="mobile-control-button" type="button" onClick={onInteract}>
+          Interact
+        </button>
+        <MobileActionButton label="Camera" code="KeyC" hold={false} />
+      </div>
+    </div>
+  );
+}
+
 type GrasslandsSceneProps = {
   sceneContent: ReactNode;
   activeNode: { text: string; options?: ConversationOption[] } | null;
   activeConversationName?: string;
   onConversationOption: (option: ConversationOption) => void;
   onCloseConversation: () => void;
+  onGoToCleanroom: () => void;
   inventoryOpen: boolean;
   inventorySupplies: InventoryDisplayEntry[];
   inventoryKeyItems: InventoryDisplayEntry[];
   debugFlags: string[];
   onToggleInventory: () => void;
+  onMobileInteract: () => void;
 };
 
 export function GrasslandsScene({
@@ -23,11 +96,13 @@ export function GrasslandsScene({
   activeConversationName,
   onConversationOption,
   onCloseConversation,
+  onGoToCleanroom,
   inventoryOpen,
   inventorySupplies,
   inventoryKeyItems,
   debugFlags,
   onToggleInventory,
+  onMobileInteract,
 }: GrasslandsSceneProps) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -52,7 +127,18 @@ export function GrasslandsScene({
         <Suspense fallback={null}>{sceneContent}</Suspense>
       </Canvas>
 
+      <div className="scene-nav">
+        <button className="scene-nav-button is-active" type="button">
+          Grasslands
+        </button>
+        <button className="scene-nav-button" type="button" onClick={onGoToCleanroom}>
+          Cleanroom
+        </button>
+      </div>
+
       <InventoryPanel isOpen={inventoryOpen} supplies={inventorySupplies} keyItems={inventoryKeyItems} debugFlags={debugFlags} onToggle={onToggleInventory} />
+
+      <MobileControls onInteract={onMobileInteract} disabled={activeNode !== null} />
 
       {activeNode ? (
         <div className="dialog-shell">
