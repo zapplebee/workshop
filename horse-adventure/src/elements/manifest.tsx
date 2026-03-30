@@ -10,6 +10,7 @@ import { Rabbit } from "./creatures/Rabbit";
 import { Snake, type SnakeAction } from "./creatures/Snake";
 import { CanyonRing } from "./fixtures/CanyonRing";
 import { Cloud } from "./fixtures/Cloud";
+import { Creek } from "./fixtures/Creek";
 import { GrassClump } from "./fixtures/GrassClump";
 import { Hill } from "./fixtures/Hill";
 import { Carrot } from "./items/Carrot";
@@ -179,6 +180,12 @@ export const elementManifest = [
     name: "Canyon Ring",
     category: "fixtures",
     render: () => <CanyonRing innerRadius={5} wallThickness={1.4} wallHeight={4.5} segments={20} />,
+  },
+  {
+    id: "creek",
+    name: "Creek",
+    category: "fixtures",
+    render: () => <Creek position={[0, 0, 0]} scale={0.08} />,
   },
   {
     id: "carrot",

@@ -11,6 +11,7 @@ import { Robin, type RobinAction } from "../../elements/creatures/Robin";
 import { Snake, type SnakeAction } from "../../elements/creatures/Snake";
 import { CanyonRing } from "../../elements/fixtures/CanyonRing";
 import { Cloud } from "../../elements/fixtures/Cloud";
+import { Creek } from "../../elements/fixtures/Creek";
 import { GrassClump } from "../../elements/fixtures/GrassClump";
 import { Hill } from "../../elements/fixtures/Hill";
 import { Carrot } from "../../elements/items/Carrot";
@@ -286,6 +287,8 @@ export function GrasslandsWorld({
       {clouds.map((cloud, index) => (
         <Cloud key={`cloud-${index}`} {...cloud} />
       ))}
+
+      <Creek position={[-18, 0.01, 34]} rotationY={-0.08} scale={1} />
 
       <CanyonRing innerRadius={PLAY_AREA_RADIUS} wallThickness={CANYON_WALL_THICKNESS} wallHeight={CANYON_WALL_HEIGHT} segments={CANYON_SEGMENTS} />
 
