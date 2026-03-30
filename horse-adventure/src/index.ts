@@ -9,6 +9,7 @@ async function loadConversation(name: string) {
 const server = serve({
   port: Number(process.env.PORT ?? 3000),
   routes: {
+    "/api/conversations/mouse": async () => Response.json(await loadConversation("mouse")),
     "/api/conversations/rabbit": async () => Response.json(await loadConversation("rabbit")),
     "/api/conversations/snake": async () => Response.json(await loadConversation("snake")),
     "/*": index,

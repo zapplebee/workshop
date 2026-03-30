@@ -1,0 +1,50 @@
+actor: mouse
+name: Field Mouse
+start: greeting
+nodes:
+  greeting:
+    text: "The field mouse freezes, whiskers trembling. 'Please don't stomp. I just arranged this patch.'"
+    animation: fright
+    options:
+      - label: "Sorry, little mouse"
+        next: sorry
+      - label: "Arranged the patch?"
+        next: patch
+      - label: "You are very small"
+        next: small
+  sorry:
+    text: "'Good,' says the mouse. 'A careful giant is much better than a careless one.'"
+    animation: idle
+    options:
+      - label: "What are you doing here?"
+        next: work
+      - label: "I'll leave you to it"
+        end: "The mouse relaxes and starts tidying the grass again."
+  patch:
+    text: "'Of course,' the mouse says. 'Every blade leans somewhere. If you nudge enough of them, you get a room.'"
+    animation: jiggle_ears_and_whiskers
+    options:
+      - label: "A room?"
+        next: work
+      - label: "That is adorable"
+        next: small
+  small:
+    text: "The mouse lifts its nose. 'Small means precise. Precise means excellent.'"
+    animation: jiggle_ears_and_whiskers
+    options:
+      - label: "Fair point"
+        next: work
+  work:
+    text: "'I gather seeds, fix tunnels, and keep the wind from getting too opinionated,' the mouse says."
+    animation: scuddle
+    options:
+      - label: "Need any help?"
+        next: help
+      - label: "I'll stay out of the way"
+        end: "The mouse gives a quick nod and disappears into the grass."
+  help:
+    text: "'Yes,' says the mouse. 'Walk softer. That counts.'"
+    animation: idle
+    options:
+      - label: "Done"
+        end: "The mouse seems satisfied for now."

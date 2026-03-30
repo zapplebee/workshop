@@ -1,28 +1,30 @@
 # Create Animal Manual
 
-This file explains how future agents should add a new animal asset in this project.
+This file explains how future agents should add a new animal asset in the current manifest-driven architecture.
 
 ## Goal
 
-Use the workshop clean room to design a new low-poly/block animal from explicit user instructions, then add a skeleton, simple animations, and finally extract the asset into its own component.
+Use the cleanroom to design a new low-poly/block animal from explicit user instructions, then add a skeleton, simple animations, and finally register it in the element manifest so it is browsable in the debug/crafting pane.
 
 ## Core Rules
 
 - Keep the gameplay scene stable while designing new animals.
-- Build new animals in the clean room first.
+- Build new animals in the cleanroom first.
 - Follow the user's block-by-block instructions exactly.
 - Do not "improve" proportions unless the user asks.
 - After the shape is approved, add skeleton and animation support.
-- Once stable, move the animal into its own file/component.
+- Once stable, move the animal into `src/elements/creatures/` and register it in `src/elements/manifest.tsx`.
 
 ## Clean Room Workflow
 
-1. Clear the workshop area.
-   - Remove the previous workshop animal from `WorkshopScene` in `src/App.tsx`.
-   - Keep the workshop floor, camera controls, gizmo, HUD, and rabbit reference unless the user asks otherwise.
+1. Select the animal in the cleanroom workflow.
+   - The cleanroom is no longer hardcoded to a single animal.
+   - Previewable assets are selected through the manifest and the route `/cleanroom/:elementId`.
+   - Keep the floor, camera controls, gizmo, and browser HUD unless the user asks otherwise.
 
-2. Build the animal in the clean room.
-   - Start with direct meshes in `WorkshopScene` if the shape is still being discovered.
+2. Build the animal in the cleanroom.
+   - Start from `src/elements/creatures/_template.tsx` when creating a new creature component.
+   - You can still begin with direct meshes while the shape is being discovered.
    - Add one block per user instruction.
    - Keep symmetry around the spine when the user requests it.
    - Prefer named constants for repeated sizes/positions instead of magic numbers.
@@ -43,8 +45,9 @@ Use the workshop clean room to design a new low-poly/block animal from explicit 
    - If one segment moves, neighboring segments should usually follow.
 
 6. Extract to its own component.
-   - Move the finished animal into `src/<animalName>.tsx` or `src/workshop<AnimalName>.tsx`.
-   - Export action types and any workshop constants needed by `App.tsx`.
+   - Move the finished animal into `src/elements/creatures/<AnimalName>.tsx`.
+   - Export the action type if the animal is animated.
+   - Register it in `src/elements/manifest.tsx` so it appears in the cleanroom browser.
    - Keep `App.tsx` as the scene orchestrator, not the asset definition file.
 
 ## Recommended Build Order
@@ -61,12 +64,13 @@ For most animals:
 8. animation states
 9. extraction to dedicated component
 
-## Workshop Scene Conventions
+## Cleanroom Conventions
 
-- Workshop uses one shared `Canvas` and scene switching with arrow keys.
-- Workshop should keep orbit controls and the view gizmo active.
-- Rabbit reference stays to the right side unless the user asks otherwise.
-- The center of the room should stay available for the animal under construction.
+- Cleanroom uses one shared route shell and route selection with React Router.
+- Cleanroom should keep orbit controls and the view gizmo active.
+- The cleanroom browser is manifest-driven and grouped by category.
+- The center of the room should stay available for the selected asset under construction.
+- The current scale reference is a simple `1x1x1` offset cube, not the old rabbit reference.
 
 ## Block Construction Guidelines
 
@@ -75,7 +79,7 @@ For most animals:
 - Use wireframe while shaping if helpful, but support turning it off.
 - Keep values explicit and understandable.
 - If the user is still exploring forms, direct JSX meshes are fine.
-- Once proportions settle, convert to structured data.
+- Once proportions settle, convert to structured data and move the component into `src/elements/creatures/`.
 
 ## When To Convert To Data
 
@@ -85,6 +89,7 @@ Convert the animal to a data-driven component when:
 - the user wants a skeleton / rigging
 - the user wants named animation actions
 - the animal is likely to move into the gameplay scene
+- the animal should appear in the cleanroom browser
 
 Recommended structure:
 
@@ -129,7 +134,7 @@ For quadrupeds:
 type WorkshopAnimalAction = "idle" | "walk" | "eat";
 ```
 
-- Add a workshop control strip so the user can preview actions.
+- Add cleanroom control metadata in the manifest so the user can preview actions.
 - Keep animation speed separate from gameplay movement speed.
 - Use `useFrame` for simple loops.
 - Base motion on the hierarchy, not on disconnected world transforms.
@@ -167,31 +172,33 @@ When swapping into gameplay:
 Suggested pattern:
 
 - `src/App.tsx`
-  - scene routing
-  - workshop HUD
+  - route orchestration
   - gameplay orchestration
-- `src/workshopHorse.tsx`
-  - horse block hierarchy
-  - horse actions
-- `src/workshopSnake.tsx`
-  - snake segments
-  - snake actions
+- `src/elements/creatures/<AnimalName>.tsx`
+  - animal geometry
+  - animation actions
+  - skeleton/highlight support if needed
+- `src/elements/manifest.tsx`
+  - cleanroom registration
+  - action metadata
+  - category/browser visibility
 
-If an animal graduates from workshop to gameplay, consider renaming to a more general file like `src/BlockHorse.tsx`.
+Do not introduce new canonical asset files under a `workshop*` namespace.
 
 ## Practical Checklist
 
 When creating a new animal, do this in order:
 
-- clear previous workshop animal
-- place new reference blocks in center
+- build or update the animal component under `src/elements/creatures/`
+- register it in `src/elements/manifest.tsx`
+- place new reference blocks in center if needed
 - follow user instructions block by block
 - keep numbers named once the form stabilizes
 - add small details last
 - add skeleton overlay
 - add action controls
 - make wireframe toggle hide the skeleton too
-- extract the animal to its own component file
+- ensure the cleanroom browser can navigate to it
 - only then consider swapping it into gameplay
 
 ## Common Pitfalls
@@ -199,16 +206,19 @@ When creating a new animal, do this in order:
 - Do not bake everything into one merged geometry before rigging.
 - Do not detach head/tail from the animated chain.
 - Do not hardcode lots of unexplained numbers once the form is stable.
-- Do not modify the gameplay animal while the user is still iterating in workshop unless explicitly asked.
-- Do not leave workshop-only asset code embedded in `App.tsx` once it becomes substantial.
+- Do not modify the gameplay animal while the user is still iterating in cleanroom unless explicitly asked.
+- Do not leave asset geometry embedded in `App.tsx` once it becomes substantial.
+- Do not add previewable assets without updating the manifest.
 
 ## Current Project Notes
 
-- The workshop already supports:
+- The cleanroom already supports:
   - arrow-key scene switching
   - orbit camera controls
-  - workshop HUD buttons
+  - manifest-driven asset browser
+  - action buttons per selected element
   - wireframe toggle
   - top-right gizmo
-- The rabbit is used as a scale/reference object.
-- The grasslands animal can use a finished workshop asset once approved.
+- route-addressable asset previews via `/cleanroom/:elementId`
+- A simple `1x1x1` offset cube is used as a scale reference.
+- Grasslands creatures can use finished cleanroom assets once approved.

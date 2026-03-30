@@ -1,33 +1,26 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, memo, useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import {
-  DoubleSide,
-  Group,
-  Quaternion,
-  Vector3,
-} from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+import { Group, Quaternion, Vector3 } from "three";
 import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import "./index.css";
-import { WORKSHOP_RABBIT_POSITION, WorkshopHorse, type WorkshopHorseAction } from "./workshopHorse";
-import { WorkshopSnake, type WorkshopSnakeAction } from "./workshopSnake";
+import { Horse as HorseElement, type HorseAction } from "./elements/creatures/Horse";
+import { Mouse, type MouseAction } from "./elements/creatures/Mouse";
+import { Rabbit } from "./elements/creatures/Rabbit";
+import { Snake, type SnakeAction } from "./elements/creatures/Snake";
+import { elementManifest, elementManifestById } from "./elements/manifest";
+import { CanyonRing } from "./elements/fixtures/CanyonRing";
+import { Cloud, type CloudProps } from "./elements/fixtures/Cloud";
+import { GrassClump } from "./elements/fixtures/GrassClump";
+import { Hill, type HillProps } from "./elements/fixtures/Hill";
+import { CleanroomScene } from "./scenes/CleanroomScene";
+import { GrasslandsScene } from "./scenes/GrasslandsScene";
 
 type PlantProps = {
   position: [number, number, number];
   scale?: number;
   lean?: number;
   tint?: string;
-};
-
-type HillProps = {
-  position: [number, number, number];
-  scale: [number, number, number];
-  tint: string;
-};
-
-type CloudProps = {
-  position: [number, number, number];
-  scale: number;
-  drift?: number;
 };
 
 type HorseProps = {
@@ -37,7 +30,7 @@ type HorseProps = {
   horseRef?: RefObject<Group | null>;
   keysRef: RefObject<MovementKeys>;
   controlsLocked?: boolean;
-  actionOverride?: WorkshopHorseAction | null;
+  actionOverride?: HorseAction | null;
 };
 
 type MovementKeys = {
@@ -49,8 +42,8 @@ type MovementKeys = {
 
 type CameraMode = "overview" | "follow";
 
-type InteractionKind = "grass" | "rabbit" | "snake";
-type ConversationActor = "rabbit" | "snake";
+type InteractionKind = "grass" | "rabbit" | "snake" | "mouse";
+type ConversationActor = "rabbit" | "snake" | "mouse";
 
 type InteractionTarget = {
   id: string;
@@ -137,6 +130,8 @@ const clouds: CloudProps[] = [
 ];
 
 const snakePosition: [number, number, number] = [-3.6, 0, -4.8];
+const mousePosition: [number, number, number] = [4.2, 0, -5.1];
+const workshopReferenceCubePosition: [number, number, number] = [3.5, 0.5, 0];
 
 const horses: HorseConfig[] = [
   { position: [1.2, 0.02, -2.8], scale: 0.92, rotationY: -0.18 },
@@ -154,6 +149,7 @@ const INTERACTION_RANGE = 2.75;
 const INTERACTION_CELL_SIZE = 12;
 const INTERACTION_CHECK_INTERVAL = 0.25;
 const RABBIT_POSITION: [number, number, number] = [6.8, 0, -5.4];
+
 
 function createGrassInstances(source: PlantProps[], prefix: string) {
   return source.map((plant, index) => ({
@@ -258,32 +254,29 @@ function useCameraMode() {
   return mode;
 }
 
-function useSceneMode() {
-  const [sceneMode, setSceneMode] = useState<SceneMode>("grasslands");
+function useSceneRouting() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const paths = useMemo(() => ["/grasslands", "/cleanroom/mouse"], []);
+  const sceneMode: SceneMode = location.pathname.startsWith("/cleanroom") ? "workshop" : "grasslands";
 
   useEffect(() => {
-    const modes: SceneMode[] = ["grasslands", "workshop"];
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code !== "ArrowLeft" && event.code !== "ArrowRight") {
         return;
       }
 
       event.preventDefault();
-      setSceneMode((currentMode) => {
-        const currentIndex = modes.indexOf(currentMode);
-        const direction = event.code === "ArrowRight" ? 1 : -1;
-        const nextIndex = (currentIndex + direction + modes.length) % modes.length;
-        return modes[nextIndex];
-      });
+      const currentIndex = paths.indexOf(location.pathname);
+      const safeIndex = currentIndex >= 0 ? currentIndex : 0;
+      const direction = event.code === "ArrowRight" ? 1 : -1;
+      const nextIndex = (safeIndex + direction + paths.length) % paths.length;
+      navigate(paths[nextIndex]);
     };
 
     window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [location.pathname, navigate, paths]);
 
   return sceneMode;
 }
@@ -398,120 +391,10 @@ const arenaGrassInstances = createArenaGrass();
 const plantInstances = createGrassInstances(plants, "plant");
 const accentPlantInstances = createGrassInstances(accentPlants, "accent");
 
-const GrassTuft = memo(function GrassTuft({
-  position,
-  scale = 1,
-  lean = 0,
-  tint = "#7aa05c",
-  highlighted = false,
-}: PlantProps & { highlighted?: boolean }) {
-  const prisms = [
-    { offset: [-0.08, 0.42, 0], scale: [0.08, 0.84, 0.08], rotation: -0.22, color: tint },
-    { offset: [0, 0.54, 0.02], scale: [0.09, 1.08, 0.09], rotation: 0.04, color: "#93c977" },
-    { offset: [0.08, 0.48, -0.01], scale: [0.08, 0.96, 0.08], rotation: 0.24, color: tint },
-  ] as const;
-
-  return (
-    <group position={position} scale={scale} rotation={[0, lean, 0]}>
-      {prisms.map((prism, index) => (
-        <group key={index} position={prism.offset} rotation={[0, prism.rotation, 0]} scale={prism.scale}>
-          {highlighted ? (
-            <mesh scale={[1.35, 1.08, 1.35]}>
-              <boxGeometry args={[1, 1, 1]} />
-              <meshBasicMaterial color="#ff59bf" transparent opacity={0.45} side={DoubleSide} />
-            </mesh>
-          ) : null}
-
-          <mesh castShadow>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color={prism.color} roughness={1} flatShading side={DoubleSide} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-});
-
-const Rabbit = memo(function Rabbit({ position, highlighted = false, wireframe = false }: RabbitProps) {
-  return (
-    <group position={[position[0], getTerrainHeight(position[0], position[2]) + 0.2, position[2]]}>
-      {highlighted ? (
-        <group>
-          <mesh position={[0, 0.34, 0]} scale={[0.96, 0.72, 0.72]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshBasicMaterial color="#ff59bf" transparent opacity={0.35} side={DoubleSide} />
-          </mesh>
-          <mesh position={[-0.12, 0.82, 0]} scale={[0.2, 0.68, 0.2]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshBasicMaterial color="#ff59bf" transparent opacity={0.35} side={DoubleSide} />
-          </mesh>
-          <mesh position={[0.12, 0.82, 0]} scale={[0.2, 0.68, 0.2]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshBasicMaterial color="#ff59bf" transparent opacity={0.35} side={DoubleSide} />
-          </mesh>
-        </group>
-      ) : null}
-
-      <mesh castShadow position={[0, 0.34, 0]} scale={[0.84, 0.6, 0.6]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe={wireframe} />
-      </mesh>
-      <mesh castShadow position={[-0.12, 0.82, 0]} scale={[0.16, 0.56, 0.16]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe={wireframe} />
-      </mesh>
-      <mesh castShadow position={[0.12, 0.82, 0]} scale={[0.16, 0.56, 0.16]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe={wireframe} />
-      </mesh>
-      <mesh castShadow position={[0.32, 0.24, -0.08]} scale={[0.22, 0.18, 0.18]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe={wireframe} />
-      </mesh>
-    </group>
-  );
-});
-
-function Hill({ position, scale, tint }: HillProps) {
-  return (
-    <mesh position={position} scale={scale} receiveShadow>
-      <sphereGeometry args={[1, 24, 16]} />
-      <meshStandardMaterial color={tint} roughness={1} flatShading />
-    </mesh>
-  );
-}
-
-function Cloud({ position, scale, drift = 0 }: CloudProps) {
-  const puffs = [
-    [-0.7, 0.02, 0],
-    [-0.25, 0.16, 0.06],
-    [0.2, 0.04, 0],
-    [0.56, 0.13, -0.02],
-    [0.95, 0.02, 0.03],
-    [0.18, -0.08, 0],
-  ] as const;
-
-  return (
-    <group position={position} scale={scale} rotation={[0, drift, 0]}>
-      <mesh position={[0, -0.18, 0]} scale={[1.9, 0.5, 0.82]}>
-        <sphereGeometry args={[1, 20, 14]} />
-        <meshBasicMaterial color="#d6e8ff" transparent opacity={0.75} fog={false} />
-      </mesh>
-
-      {puffs.map(([x, y, z], index) => (
-        <mesh key={index} position={[x, y, z]} scale={[0.95, 0.82, 0.8]}>
-          <sphereGeometry args={[0.55 + (index % 2) * 0.08, 18, 14]} />
-          <meshBasicMaterial color={index % 2 === 0 ? "#fffefc" : "#eef5ff"} transparent opacity={0.98} fog={false} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
 function Horse({ position, scale, rotationY = 0, horseRef, keysRef, controlsLocked = false, actionOverride = null }: HorseProps) {
   const localGroupRef = useRef<Group>(null);
   const groupRef = horseRef ?? localGroupRef;
-  const [action, setAction] = useState<WorkshopHorseAction>(actionOverride ?? "stand");
+  const [action, setAction] = useState<HorseAction>(actionOverride ?? "stand");
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -569,7 +452,7 @@ function Horse({ position, scale, rotationY = 0, horseRef, keysRef, controlsLock
 
   return (
     <group ref={groupRef} position={position} rotation={[0, rotationY, 0]} scale={scale}>
-      <WorkshopHorse action={action} showSkeleton={false} wireframe={false} />
+      <HorseElement action={action} showSkeleton={false} wireframe={false} />
     </group>
   );
 }
@@ -748,44 +631,14 @@ function InteractionController({
   return null;
 }
 
-function CanyonRing() {
-  const innerRadius = PLAY_AREA_RADIUS;
-  const outerRadius = PLAY_AREA_RADIUS + CANYON_WALL_THICKNESS;
-  const ringY = CANYON_WALL_HEIGHT * 0.5;
-
-  return (
-    <group position={[0, ringY, 0]}>
-      <mesh castShadow receiveShadow>
-        <cylinderGeometry args={[outerRadius, outerRadius, CANYON_WALL_HEIGHT, CANYON_SEGMENTS, 1, true]} />
-        <meshStandardMaterial color="#b4663f" roughness={1} flatShading side={DoubleSide} />
-      </mesh>
-
-      <mesh castShadow receiveShadow>
-        <cylinderGeometry args={[innerRadius, innerRadius, CANYON_WALL_HEIGHT - 2, CANYON_SEGMENTS, 1, true]} />
-        <meshStandardMaterial color="#c57f50" roughness={1} flatShading side={DoubleSide} />
-      </mesh>
-
-      <mesh position={[0, CANYON_WALL_HEIGHT * 0.5 - 1.2, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[outerRadius, outerRadius, 2.4, CANYON_SEGMENTS, 1, true]} />
-        <meshStandardMaterial color="#dda06c" roughness={1} flatShading side={DoubleSide} />
-      </mesh>
-
-      <mesh position={[0, -CANYON_WALL_HEIGHT * 0.5 + 1.2, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[outerRadius, outerRadius, 2.4, CANYON_SEGMENTS, 1, true]} />
-        <meshStandardMaterial color="#9e5534" roughness={1} flatShading side={DoubleSide} />
-      </mesh>
-    </group>
-  );
-}
-
 function WorkshopScene({
+  content,
   onCameraQuaternionChange,
-  snakeAction,
-  wireframe,
+  showReferenceRabbit,
 }: {
+  content: ReactNode;
   onCameraQuaternionChange?: (quaternion: [number, number, number, number]) => void;
-  snakeAction: WorkshopSnakeAction;
-  wireframe: boolean;
+  showReferenceRabbit?: boolean;
 }) {
   return (
     <>
@@ -803,94 +656,14 @@ function WorkshopScene({
         <meshStandardMaterial color="#50555d" roughness={1} flatShading />
       </mesh>
 
-      <mesh position={[0, 0.3315, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.51, 0.51, 0.51]} />
-        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
-      </mesh>
+      {content}
 
-      <mesh position={[-0.2, 0.0765, -0.22]} castShadow receiveShadow>
-        <boxGeometry args={[0.153, 0.153, 0.153]} />
-        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[-0.2, 0.0765, 0.22]} castShadow receiveShadow>
-        <boxGeometry args={[0.153, 0.153, 0.153]} />
-        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[0.2, 0.0765, -0.22]} castShadow receiveShadow>
-        <boxGeometry args={[0.153, 0.153, 0.153]} />
-        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[0.2, 0.0765, 0.22]} castShadow receiveShadow>
-        <boxGeometry args={[0.153, 0.153, 0.153]} />
-        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[0.33, 0.46, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.33, 0.33, 0.33]} />
-        <meshStandardMaterial color="#7b6a5b" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[0.28, 0.67, -0.16]} castShadow receiveShadow>
-        <boxGeometry args={[0.04, 0.24, 0.18]} />
-        <meshStandardMaterial color="#8a7867" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[0.28, 0.67, 0.16]} castShadow receiveShadow>
-        <boxGeometry args={[0.04, 0.24, 0.18]} />
-        <meshStandardMaterial color="#8a7867" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[0.39, 0.49, -0.18]} castShadow receiveShadow>
-        <boxGeometry args={[0.05, 0.05, 0.05]} />
-        <meshStandardMaterial color="#111111" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[0.39, 0.49, 0.18]} castShadow receiveShadow>
-        <boxGeometry args={[0.05, 0.05, 0.05]} />
-        <meshStandardMaterial color="#111111" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[0.515, 0.39, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.05, 0.05, 0.05]} />
-        <meshStandardMaterial color="#111111" roughness={1} flatShading />
-      </mesh>
-
-      {[
-        [0.49, 0.45, -0.22],
-        [0.49, 0.39, -0.24],
-        [0.49, 0.33, -0.22],
-      ].map((position, index) => (
-        <mesh key={`mouse-whisker-left-${index}`} position={position as [number, number, number]} castShadow receiveShadow>
-          <boxGeometry args={[0.015, 0.015, 0.16]} />
-          <meshStandardMaterial color="#e7e0d8" roughness={1} flatShading />
+      {showReferenceRabbit ? (
+        <mesh position={workshopReferenceCubePosition} castShadow receiveShadow>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#efe8de" roughness={1} flatShading wireframe />
         </mesh>
-      ))}
-
-      {[
-        [0.49, 0.45, 0.22],
-        [0.49, 0.39, 0.24],
-        [0.49, 0.33, 0.22],
-      ].map((position, index) => (
-        <mesh key={`mouse-whisker-right-${index}`} position={position as [number, number, number]} castShadow receiveShadow>
-          <boxGeometry args={[0.015, 0.015, 0.16]} />
-          <meshStandardMaterial color="#e7e0d8" roughness={1} flatShading />
-        </mesh>
-      ))}
-
-      <mesh position={[-0.3, 0.24, 0]} rotation={[0, 0, -0.14]} castShadow receiveShadow>
-        <boxGeometry args={[0.34, 0.05, 0.05]} />
-        <meshStandardMaterial color="#b89d8c" roughness={1} flatShading />
-      </mesh>
-
-      <mesh position={[-0.46, 0.205, 0]} rotation={[0, 0, -0.3]} castShadow receiveShadow>
-        <boxGeometry args={[0.3, 0.045, 0.045]} />
-        <meshStandardMaterial color="#b89d8c" roughness={1} flatShading />
-      </mesh>
-
-      <Rabbit id="workshop-rabbit" position={WORKSHOP_RABBIT_POSITION} wireframe />
+      ) : null}
     </>
   );
 }
@@ -918,13 +691,14 @@ function Scene({
     ...plantInstances,
   ]);
   const [nearestInteractionId, setNearestInteractionId] = useState<string | null>(null);
-  const [horseActionOverride, setHorseActionOverride] = useState<WorkshopHorseAction | null>(null);
+  const [horseActionOverride, setHorseActionOverride] = useState<HorseAction | null>(null);
   const rabbit: RabbitProps = { id: "rabbit-0", position: RABBIT_POSITION };
   const interactables = useMemo<InteractionTarget[]>(
     () => [
       ...grassItems.map((item) => ({ id: item.id, kind: "grass" as const, position: item.position })),
       { id: rabbit.id, kind: "rabbit" as const, position: rabbit.position, range: 3.5 },
       { id: "snake-0", kind: "snake" as const, position: snakePosition, range: 4 },
+      { id: "mouse-0", kind: "mouse" as const, position: mousePosition, range: 3.5 },
     ],
     [grassItems],
   );
@@ -954,6 +728,12 @@ function Scene({
     if (target.kind === "snake") {
       setNearestInteractionId(target.id);
       onConversationStart("snake");
+      return;
+    }
+
+    if (target.kind === "mouse") {
+      setNearestInteractionId(target.id);
+      onConversationStart("mouse");
     }
   };
 
@@ -968,12 +748,15 @@ function Scene({
     }
   }, [conversationActive]);
 
-  const snakeAction: WorkshopSnakeAction = conversationActor === "snake"
-    ? ((conversationNodeAnimation as WorkshopSnakeAction | undefined) ?? "idle")
+  const snakeAction: SnakeAction = conversationActor === "snake"
+    ? ((conversationNodeAnimation as SnakeAction | undefined) ?? "idle")
+    : "idle";
+  const mouseAction: MouseAction = conversationActor === "mouse"
+    ? ((conversationNodeAnimation as MouseAction | undefined) ?? "idle")
     : "idle";
 
-  const horseConversationAction: WorkshopHorseAction | null = conversationActor === "rabbit"
-    ? ((conversationNodeAnimation as WorkshopHorseAction | undefined) ?? "jiggle_ears")
+  const horseConversationAction: HorseAction | null = conversationActor === "rabbit"
+    ? ((conversationNodeAnimation as HorseAction | undefined) ?? "jiggle_ears")
     : null;
 
   useEffect(() => {
@@ -1012,7 +795,7 @@ function Scene({
         <Cloud key={`cloud-${index}`} {...cloud} />
       ))}
 
-      <CanyonRing />
+      <CanyonRing innerRadius={PLAY_AREA_RADIUS} wallThickness={CANYON_WALL_THICKNESS} wallHeight={CANYON_WALL_HEIGHT} segments={CANYON_SEGMENTS} />
 
       {horses.map((horse, index) => (
         <Horse
@@ -1026,10 +809,14 @@ function Scene({
       ))}
 
       <group position={[snakePosition[0], getTerrainHeight(snakePosition[0], snakePosition[2]) + 0.02, snakePosition[2]]} rotation={[0, 0.22, 0]}>
-        <WorkshopSnake action={snakeAction} highlighted={nearestInteractionId === "snake-0"} showSkeleton={false} wireframe={false} />
+        <Snake action={snakeAction} highlighted={nearestInteractionId === "snake-0"} showSkeleton={false} wireframe={false} />
       </group>
 
-      <Rabbit {...rabbit} highlighted={rabbit.id === nearestInteractionId} />
+      <group position={[mousePosition[0], getTerrainHeight(mousePosition[0], mousePosition[2]) + 0.02, mousePosition[2]]} rotation={[0, -0.18, 0]} scale={0.62}>
+        <Mouse action={mouseAction} highlighted={nearestInteractionId === "mouse-0"} showSkeleton={false} wireframe={false} />
+      </group>
+
+      <Rabbit {...rabbit} highlighted={rabbit.id === nearestInteractionId} terrainHeightAt={getTerrainHeight} />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[700, 700]} />
@@ -1041,17 +828,19 @@ function Scene({
       ))}
 
       {grassItems.map((plant) => (
-        <GrassTuft key={plant.id} {...plant} highlighted={plant.id === nearestInteractionId} />
+        <GrassClump key={plant.id} {...plant} highlighted={plant.id === nearestInteractionId} />
       ))}
     </>
   );
 }
 
-export function App() {
+function AppRoutes() {
   const [workshopCameraQuaternion, setWorkshopCameraQuaternion] = useState<[number, number, number, number]>([0, 0, 0, 1]);
-  const [workshopSnakeAction, setWorkshopSnakeAction] = useState<WorkshopSnakeAction>("slither");
-  const [workshopSnakeWireframe, setWorkshopSnakeWireframe] = useState(true);
-  const sceneMode = useSceneMode();
+  const [cleanroomActions, setCleanroomActions] = useState<Record<string, string>>({});
+  const [cleanroomWireframes, setCleanroomWireframes] = useState<Record<string, boolean>>({});
+  const sceneMode = useSceneRouting();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<ConversationStore>({});
   const [activeConversationActor, setActiveConversationActor] = useState<ConversationActor | null>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
@@ -1062,15 +851,17 @@ export function App() {
     let cancelled = false;
 
     const loadConversation = async () => {
-      const [rabbitResponse, snakeResponse] = await Promise.all([
+      const [mouseResponse, rabbitResponse, snakeResponse] = await Promise.all([
+        fetch("/api/conversations/mouse"),
         fetch("/api/conversations/rabbit"),
         fetch("/api/conversations/snake"),
       ]);
+      const mouse = (await mouseResponse.json()) as ConversationTree;
       const rabbit = (await rabbitResponse.json()) as ConversationTree;
       const snake = (await snakeResponse.json()) as ConversationTree;
 
       if (!cancelled) {
-        setConversations({ rabbit, snake });
+        setConversations({ mouse, rabbit, snake });
       }
     };
 
@@ -1118,92 +909,78 @@ export function App() {
     closeConversation();
   };
 
+  const grasslandsContent = (
+    <Scene
+      conversationActive={activeNode !== null}
+      conversationActor={activeConversationActor}
+      conversationNodeAnimation={activeNode?.animation}
+      controlsLocked={activeNode !== null}
+      onConversationStart={handleConversationStart}
+    />
+  );
+
+  const selectedElementId = location.pathname.startsWith("/cleanroom/") ? location.pathname.replace("/cleanroom/", "") : "mouse";
+  const selectedEntry = elementManifestById[selectedElementId] ?? elementManifestById.mouse;
+  const selectedControls = selectedEntry.controls;
+  const selectedAction = selectedControls ? cleanroomActions[selectedEntry.id] ?? selectedControls.defaultAction : "none";
+  const selectedWireframe = selectedControls?.wireframeLabel ? (cleanroomWireframes[selectedEntry.id] ?? true) : false;
+  const cleanroomBrowser = ["creatures", "fixtures", "items"].map((category) => ({
+    category,
+    entries: elementManifest.filter((entry) => entry.category === category).map((entry) => ({ id: entry.id, name: entry.name })),
+  })).filter((group) => group.entries.length > 0);
+  const cleanroomContent = (
+    <WorkshopScene
+      content={selectedEntry.render({ action: selectedAction, wireframe: selectedWireframe })}
+      onCameraQuaternionChange={setWorkshopCameraQuaternion}
+      showReferenceRabbit={selectedEntry.id !== "rabbit"}
+    />
+  );
+
   return (
-    <div className="scene-shell">
-      <Canvas
-        shadows
-        className="scene-canvas"
-        dpr={[1, 1.5]}
-        camera={
-          sceneMode === "grasslands"
-            ? { position: [0, 14, 42], fov: 42, near: 0.1, far: 700 }
-            : { position: [0, 6, 14], fov: 46, near: 0.1, far: 200 }
+    <Routes>
+      <Route
+        path="grasslands"
+        element={
+          <GrasslandsScene
+            sceneContent={grasslandsContent}
+            activeNode={activeNode}
+            activeConversationName={activeConversation?.name}
+            onConversationOption={handleConversationOption}
+            onCloseConversation={closeConversation}
+          />
         }
-      >
-        <Suspense fallback={null}>
-          {sceneMode === "grasslands" ? (
-            <Scene
-              conversationActive={activeNode !== null}
-              conversationActor={activeConversationActor}
-              conversationNodeAnimation={activeNode?.animation}
-              controlsLocked={activeNode !== null}
-              onConversationStart={handleConversationStart}
-            />
-          ) : (
-            <WorkshopScene
-              snakeAction={workshopSnakeAction}
-              wireframe={workshopSnakeWireframe}
-              onCameraQuaternionChange={setWorkshopCameraQuaternion}
-            />
-          )}
-        </Suspense>
-      </Canvas>
+      />
+      <Route
+        path="cleanroom/:elementId"
+        element={
+          <CleanroomScene
+            sceneContent={cleanroomContent}
+            gizmoContent={<WorkshopGizmoScene quaternion={workshopCameraQuaternion} />}
+            browser={cleanroomBrowser}
+            selectedElementId={selectedEntry.id}
+            onElementSelect={(nextElementId) => navigate(`/cleanroom/${nextElementId}`)}
+            title={selectedControls?.title ?? `${selectedEntry.name} Preview`}
+            help={selectedControls?.help ?? "Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes."}
+            actions={selectedControls?.actions ?? []}
+            activeAction={selectedAction}
+            onActionChange={(action) => setCleanroomActions((current) => ({ ...current, [selectedEntry.id]: action }))}
+            wireframe={selectedWireframe}
+            onWireframeChange={(checked) => setCleanroomWireframes((current) => ({ ...current, [selectedEntry.id]: checked }))}
+            wireframeLabel={selectedControls?.wireframeLabel ?? ""}
+          />
+        }
+      />
+      <Route path="cleanroom" element={<Navigate to="/cleanroom/mouse" replace />} />
+      <Route path="*" element={<Navigate to="/grasslands" replace />} />
+    </Routes>
+  );
+}
 
-      {activeNode && sceneMode === "grasslands" ? (
-        <div className="dialog-shell">
-          <div className="dialog-card">
-            <div className="dialog-name">{activeConversation?.name ?? "Conversation"}</div>
-            <p className="dialog-text">{activeNode.text}</p>
-            <div className="dialog-options">
-              {activeNode.options?.map((option, index) => (
-                <button key={index} className="dialog-option" type="button" onClick={() => handleConversationOption(option)}>
-                  {option.label}
-                </button>
-              ))}
-              {!activeNode.options?.length ? (
-                <button className="dialog-option" type="button" onClick={closeConversation}>
-                  Continue
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {sceneMode === "workshop" ? (
-        <>
-          <div className="workshop-hud">
-            <div className="workshop-title">Workshop Camera</div>
-            <p className="workshop-help">Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.</p>
-            <div className="workshop-controls">
-              {(["slither", "idle", "coil", "spring"] as WorkshopSnakeAction[]).map((action) => (
-                <button
-                  key={action}
-                  className={`workshop-control${workshopSnakeAction === action ? " is-active" : ""}`}
-                  type="button"
-                  onClick={() => setWorkshopSnakeAction(action)}
-                >
-                  {action}
-                </button>
-              ))}
-            </div>
-            <label className="workshop-toggle">
-              <input
-                checked={workshopSnakeWireframe}
-                type="checkbox"
-                onChange={(event) => setWorkshopSnakeWireframe(event.target.checked)}
-              />
-              <span>Wireframe snake</span>
-            </label>
-          </div>
-          <div className="workshop-gizmo">
-            <Canvas className="workshop-gizmo-canvas" camera={{ position: [0, 0, 4], fov: 32, near: 0.1, far: 20 }}>
-              <WorkshopGizmoScene quaternion={workshopCameraQuaternion} />
-            </Canvas>
-          </div>
-        </>
-      ) : null}
-    </div>
+export function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
 

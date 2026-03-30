@@ -112,6 +112,47 @@ body {
   line-height: 1.4;
 }
 
+.workshop-browser {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  pointer-events: auto;
+}
+
+.workshop-browser-group {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.workshop-browser-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.78;
+  text-transform: uppercase;
+}
+
+.workshop-browser-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.workshop-browser-item {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef6ff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.35rem 0.7rem;
+}
+
+.workshop-browser-item.is-active {
+  background: rgba(130, 183, 255, 0.24);
+  border-color: rgba(130, 183, 255, 0.7);
+}
+
 .workshop-controls {
   display: flex;
   flex-wrap: wrap;
