@@ -1,0 +1,56 @@
+actor: cardinal
+name: Cardinal
+start: greeting
+nodes:
+  greeting:
+    text: "The cardinal straightens its crest. 'At last. A visitor who can appreciate a proper lookout.'"
+    animation: idle
+    options:
+      - label: "You like this spot?"
+        next: lookout
+      - label: "You seem confident"
+        next: confident
+      - label: "I'll let you keep watch"
+        end: "The cardinal gives a regal nod and resumes scanning the grasslands."
+  lookout:
+    text: "'Of course,' says the cardinal. 'Far from the rabbit committee, far from the snake philosophy, far from mouse renovations.'"
+    animation: preen
+    options:
+      - label: "You know the others?"
+        next: others
+      - label: "So you came for peace"
+        next: peace
+  confident:
+    text: "The cardinal flicks its wings. 'Confidence is just good posture with an audience.'"
+    animation: flutter
+    options:
+      - label: "That sounds exhausting"
+        next: peace
+      - label: "It suits you"
+        next: others
+  others:
+    text: "'Naturally,' the cardinal says. 'Someone has to keep track of the local personalities, and I am extremely trackable.'"
+    animation: flutter
+    options:
+      - label: "What do you keep track of?"
+        next: track
+  peace:
+    text: "'Peace, perspective, and the occasional dramatic entrance,' says the cardinal. 'A bird should have standards.'"
+    animation: preen
+    options:
+      - label: "Can you do a dramatic entrance?"
+        next: entrance
+      - label: "Reasonable"
+        next: track
+  entrance:
+    text: "The cardinal snaps upward in a burst of red. 'That was the compact version.'"
+    animation: fly
+    options:
+      - label: "Impressive"
+        next: track
+  track:
+    text: "'Wind direction, stray seeds, suspicious shadows, wandering horses,' the cardinal says. 'The whole meadow improves when someone curates it.'"
+    animation: idle
+    options:
+      - label: "I'll try to be less suspicious"
+        end: "The cardinal considers this, then grants you an approving tilt of the head."

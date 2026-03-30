@@ -222,3 +222,4 @@ When creating a new animal, do this in order:
 - route-addressable asset previews via `/cleanroom/:elementId`
 - A simple `1x1x1` offset cube is used as a scale reference.
 - Grasslands creatures can use finished cleanroom assets once approved.
+- User decision: new world elements should be added to the cleanroom by default so they can be refined there before or during gameplay use.

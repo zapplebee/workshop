@@ -39,7 +39,7 @@ export function Snake({ action, wireframe, showSkeleton, highlighted = false }: 
     const time = clock.getElapsedTime();
     const bodyPhase = time * 3.2;
     for (let index = 0; index < SEGMENT_POSITIONS.length; index += 1) {
-      let x = SEGMENT_POSITIONS[index];
+      let x = SEGMENT_POSITIONS[index]!;
       let y = SEGMENT_Y;
       let z = 0;
       let rotY = 0;
@@ -53,8 +53,8 @@ export function Snake({ action, wireframe, showSkeleton, highlighted = false }: 
         const coilRadii = [0.54, 0.44, 0.36, 0.34, 0.4, 0.5];
         const centerX = -0.15;
         const pulse = Math.sin(time * 2.4) * 0.03;
-        const angle = coilAngles[index] + Math.sin(time * 1.4 + index * 0.55) * 0.04;
-        const radius = coilRadii[index] + pulse;
+        const angle = coilAngles[index]! + Math.sin(time * 1.4 + index * 0.55) * 0.04;
+        const radius = coilRadii[index]! + pulse;
         x = centerX + Math.cos(angle) * radius;
         z = Math.sin(angle) * radius;
         y = SEGMENT_Y + index * 0.012 + Math.cos(time * 2 + index * 0.45) * 0.01;
@@ -81,8 +81,8 @@ export function Snake({ action, wireframe, showSkeleton, highlighted = false }: 
       jointPositions[index + 1] = [x, y, z];
     }
 
-    const firstSegment = jointPositions[1];
-    const lastSegment = jointPositions[jointPositions.length - 2];
+    const firstSegment = jointPositions[1]!;
+    const lastSegment = jointPositions[jointPositions.length - 2]!;
     if (tailRef.current) {
       let tailX = TAIL_POSITION[0];
       let tailY = TAIL_POSITION[1];
@@ -127,13 +127,13 @@ export function Snake({ action, wireframe, showSkeleton, highlighted = false }: 
     }
     for (let index = 0; index < jointPositions.length; index += 1) {
       const joint = jointRefs.current[index];
-      if (joint) joint.position.set(...jointPositions[index]);
+      if (joint) joint.position.set(...jointPositions[index]!);
     }
     for (let index = 0; index < jointPositions.length - 1; index += 1) {
       const bone = boneRefs.current[index];
       if (!bone) continue;
-      const [fromX, fromY, fromZ] = jointPositions[index];
-      const [toX, toY, toZ] = jointPositions[index + 1];
+      const [fromX, fromY, fromZ] = jointPositions[index]!;
+      const [toX, toY, toZ] = jointPositions[index + 1]!;
       tempVector.set(toX - fromX, toY - fromY, toZ - fromZ);
       const length = tempVector.length();
       bone.position.set((fromX + toX) * 0.5, (fromY + toY) * 0.5, (fromZ + toZ) * 0.5);

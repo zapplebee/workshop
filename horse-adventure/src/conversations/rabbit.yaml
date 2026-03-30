@@ -18,6 +18,11 @@ nodes:
     options:
       - label: "I will be careful"
         next: advice
+      - label: "I brought carrots"
+        next: carrots
+        requiresItems:
+          - itemId: carrot
+            amount: 3
       - label: "I make no promises"
         next: sass
   grazing:
@@ -34,6 +39,31 @@ nodes:
     options:
       - label: "Thanks"
         end: "The rabbit gives a proud little nod."
+  carrots:
+    text: "The rabbit's ears shoot straight up. 'Carrots? Actual carrots? That is a much more respectful greeting.'"
+    animation: jiggle_ears
+    options:
+      - label: "Give the rabbit some carrots"
+        next: carrot_thanks
+        removeItems:
+          - itemId: carrot
+            amount: 3
+        setFlags:
+          - rabbit.carrots_given
+      - label: "Maybe I should keep them"
+        next: carrot_hesitate
+  carrot_thanks:
+    text: "The rabbit gathers the carrots in a blur. 'These are excellent. Crunchy, bright, and not grass at all. You may approach my hill with slightly more confidence.'"
+    animation: stand
+    options:
+      - label: "Glad to help"
+        end: "The rabbit munches happily and watches the meadow with renewed dignity."
+  carrot_hesitate:
+    text: "The rabbit sniffs. 'Then why mention them? That is reckless conversational behavior.'"
+    animation: jiggle_ears
+    options:
+      - label: "Fair criticism"
+        next: advice
   sass:
     text: "The rabbit narrows its eyes. 'Then at least chew politely.'"
     animation: jiggle_ears

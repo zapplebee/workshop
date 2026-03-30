@@ -1,12 +1,15 @@
 import type { ReactNode } from "react";
+import { Cardinal, type CardinalAction } from "./creatures/Cardinal";
 import { Horse, type HorseAction } from "./creatures/Horse";
 import { Mouse, type MouseAction } from "./creatures/Mouse";
+import { Robin, type RobinAction } from "./creatures/Robin";
 import { Rabbit } from "./creatures/Rabbit";
 import { Snake, type SnakeAction } from "./creatures/Snake";
 import { CanyonRing } from "./fixtures/CanyonRing";
 import { Cloud } from "./fixtures/Cloud";
 import { GrassClump } from "./fixtures/GrassClump";
 import { Hill } from "./fixtures/Hill";
+import { Carrot } from "./items/Carrot";
 
 export type ElementCategory = "creatures" | "fixtures" | "items";
 
@@ -32,6 +35,19 @@ export type ElementManifestEntry<Action extends string = string> = {
 };
 
 export const elementManifest = [
+  {
+    id: "cardinal",
+    name: "Cardinal",
+    category: "creatures",
+    controls: {
+      title: "Cardinal Workshop",
+      help: "Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.",
+      actions: ["idle", "preen", "flutter", "fly"] as const,
+      defaultAction: "idle",
+      wireframeLabel: "Wireframe cardinal",
+    },
+    render: ({ action = "idle", wireframe }) => <Cardinal action={action as CardinalAction} showSkeleton={wireframe} wireframe={wireframe} />,
+  },
   {
     id: "horse",
     name: "Horse",
@@ -85,6 +101,19 @@ export const elementManifest = [
     render: ({ wireframe }) => <Rabbit id="preview-rabbit" position={[0, 0, 0]} wireframe={wireframe} />,
   },
   {
+    id: "robin",
+    name: "Robin",
+    category: "creatures",
+    controls: {
+      title: "Robin Workshop",
+      help: "Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.",
+      actions: ["idle", "preen", "flutter", "fly"] as const,
+      defaultAction: "idle",
+      wireframeLabel: "Wireframe robin",
+    },
+    render: ({ action = "idle", wireframe }) => <Robin action={action as RobinAction} showSkeleton={wireframe} wireframe={wireframe} />,
+  },
+  {
     id: "cloud",
     name: "Cloud",
     category: "fixtures",
@@ -107,6 +136,19 @@ export const elementManifest = [
     name: "Canyon Ring",
     category: "fixtures",
     render: () => <CanyonRing innerRadius={5} wallThickness={1.4} wallHeight={4.5} segments={20} />,
+  },
+  {
+    id: "carrot",
+    name: "Carrot",
+    category: "items",
+    controls: {
+      title: "Carrot Preview",
+      help: "Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.",
+      actions: ["still"] as const,
+      defaultAction: "still",
+      wireframeLabel: "Wireframe carrot",
+    },
+    render: ({ wireframe }) => <Carrot position={[0, 0, 0]} wireframe={wireframe} />,
   },
 ] satisfies ElementManifestEntry[];
 

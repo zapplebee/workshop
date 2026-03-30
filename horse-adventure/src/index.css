@@ -42,6 +42,115 @@ body {
   pointer-events: none;
 }
 
+.inventory-shell {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  z-index: 2;
+}
+
+.inventory-toggle,
+.inventory-close {
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(17, 31, 56, 0.7);
+  color: #eef6ff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.55rem 0.9rem;
+}
+
+.inventory-toggle.is-active {
+  background: rgba(255, 143, 209, 0.24);
+  border-color: rgba(255, 143, 209, 0.65);
+}
+
+.inventory-panel {
+  width: min(24rem, calc(100vw - 2rem));
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 1rem;
+  background: rgba(16, 28, 46, 0.9);
+  box-shadow: 0 1rem 2rem rgba(15, 25, 42, 0.28);
+  color: #eef6ff;
+  padding: 1rem;
+}
+
+.inventory-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.inventory-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.92;
+  text-transform: uppercase;
+}
+
+.inventory-help {
+  margin: 0.35rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.inventory-section {
+  margin-top: 1rem;
+}
+
+.inventory-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.78;
+  text-transform: uppercase;
+}
+
+.inventory-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
+}
+
+.inventory-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.65rem 0.75rem;
+}
+
+.inventory-item-name {
+  font-weight: 700;
+}
+
+.inventory-item-description {
+  margin-top: 0.2rem;
+  color: rgba(238, 246, 255, 0.75);
+  font-size: 0.88rem;
+}
+
+.inventory-count {
+  min-width: 3.8rem;
+  border-radius: 999px;
+  background: rgba(130, 183, 255, 0.2);
+  color: #eef6ff;
+  padding: 0.3rem 0.65rem;
+  text-align: center;
+}
+
+.inventory-empty {
+  margin-top: 0.6rem;
+  color: rgba(238, 246, 255, 0.72);
+}
+
 .dialog-card {
   width: min(36rem, 100%);
   border: 2px solid rgba(255, 112, 191, 0.55);

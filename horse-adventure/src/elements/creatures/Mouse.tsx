@@ -139,7 +139,7 @@ export function Mouse({ action, wireframe, showSkeleton, highlighted = false }: 
 
     footRefs.current.forEach((group, index) => {
       if (!group) return;
-      const base = MOUSE_FOOT_POSITIONS[index];
+      const base = MOUSE_FOOT_POSITIONS[index]!;
       const lift = action === "scuddle" ? Math.max(0, Math.sin(t * 12 + (index % 2) * Math.PI)) * 0.03 : 0;
       group.position.set(base[0], base[1] + lift, base[2]);
     });
@@ -153,7 +153,7 @@ export function Mouse({ action, wireframe, showSkeleton, highlighted = false }: 
           <meshBasicMaterial color={MOUSE_JOINT_COLOR} />
         </mesh>
       )) : null}
-      {showSkeleton ? MOUSE_SKELETON_POINTS.slice(0, -1).map((point, index) => <Bone key={`mouse-bone-${index}`} from={point} to={MOUSE_SKELETON_POINTS[index + 1]} />) : null}
+      {showSkeleton ? MOUSE_SKELETON_POINTS.slice(0, -1).map((point, index) => <Bone key={`mouse-bone-${index}`} from={point} to={MOUSE_SKELETON_POINTS[index + 1]!} />) : null}
 
       <group ref={bodyRef} position={MOUSE_BODY_POSITION}>
         {highlighted ? <mesh scale={[1.08, 1.08, 1.08]}><boxGeometry args={MOUSE_BODY_SIZE} /><meshBasicMaterial color="#ff59bf" transparent opacity={0.38} /></mesh> : null}

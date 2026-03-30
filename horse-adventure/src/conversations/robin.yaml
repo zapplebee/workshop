@@ -1,0 +1,54 @@
+actor: robin
+name: Robin
+start: greeting
+nodes:
+  greeting:
+    text: "The robin hops once and cocks its head. 'You are a long way from the noisy part of the meadow.'"
+    animation: idle
+    options:
+      - label: "I was exploring"
+        next: exploring
+      - label: "What are you doing out here?"
+        next: foraging
+      - label: "Sorry to interrupt"
+        next: interrupt
+  exploring:
+    text: "'Good,' says the robin. 'The far grass sounds different. You can hear where the beetles argue.'"
+    animation: preen
+    options:
+      - label: "You listen for beetles?"
+        next: listen
+      - label: "That seems useful"
+        next: useful
+  foraging:
+    text: "'Breakfast, mostly,' the robin says. 'But also gossip. The ground tells stories if you peck at it politely.'"
+    animation: flutter
+    options:
+      - label: "What stories?"
+        next: stories
+      - label: "Politely?"
+        next: useful
+  interrupt:
+    text: "The robin gives a tiny shrug. 'You are less of an interruption than the wind.'"
+    animation: idle
+    options:
+      - label: "I can live with that"
+        next: useful
+  listen:
+    text: "'Beetles, seeds, weather, hooves,' says the robin. 'Mostly I sort out which noises matter.'"
+    animation: preen
+    options:
+      - label: "And do mine matter?"
+        next: useful
+  stories:
+    text: "'A fox passed through at sunrise, a rabbit doubled back by the hill, and you nearly stepped on a mushroom patch yesterday.'"
+    animation: flutter
+    options:
+      - label: "You notice a lot"
+        next: useful
+  useful:
+    text: "'Someone should,' the robin says. 'You big creatures blur past all the good details.'"
+    animation: idle
+    options:
+      - label: "I'll pay closer attention"
+        end: "The robin seems pleased and goes back to inspecting the grass."

@@ -8,9 +8,21 @@ nodes:
     options:
       - label: "Sorry, little mouse"
         next: sorry
+      - label: "Snake said you hide your best seeds under the flattest grass"
+        next: clue_callout
+        requiresFlags:
+          - snake.shared_mouse_seed_clue
       - label: "Arranged the patch?"
         next: patch
       - label: "You are very small"
+        next: small
+  clue_callout:
+    text: "The mouse goes rigid. 'He noticed that?' A beat passes. 'Fine. Yes. The flat patch keeps the wind from tattling. Since you already know, the neatest little room is just beyond the hill grass.'"
+    animation: fright
+    options:
+      - label: "I will keep your secret"
+        next: work
+      - label: "I knew it"
         next: small
   sorry:
     text: "'Good,' says the mouse. 'A careful giant is much better than a careless one.'"

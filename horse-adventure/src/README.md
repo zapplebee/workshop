@@ -11,6 +11,7 @@ If you are a future agent ramping into the project, read these first:
 3. `elements/README.md`
 4. `scenes/README.md`
 5. `conversations/README.md`
+6. `features/README.md`
 
 Most important architecture file:
 
@@ -21,9 +22,10 @@ That manifest controls which assets are browsable in the cleanroom, how they are
 ## Directory Guide
 
 - `elements/`: reusable renderable world pieces and creatures
+- `features/`: gameplay and app subsystems like grasslands, conversations, inventory, cleanroom state, navigation, and world flags
 - `scenes/`: route-level scene shells and UI wrappers
 - `conversations/`: YAML dialogue definitions
-- `App.tsx`: app-level routing, conversation state, cleanroom selection, and main grasslands composition
+- `App.tsx`: app-level routing, inventory/world-flag orchestration, conversation state, cleanroom selection, and main grasslands composition
 - `frontend.tsx`: browser entry point
 - `index.ts`: Bun server entry point
 
@@ -34,6 +36,7 @@ Keep reusable world objects in `elements/`, not in `App.tsx`.
 `App.tsx` should increasingly act as orchestration glue:
 
 - route selection
+- inventory and world-flag ownership
 - conversation loading/state
 - scene assembly
 - high-level gameplay state
@@ -41,3 +44,7 @@ Keep reusable world objects in `elements/`, not in `App.tsx`.
 ## Cleanroom Rule
 
 The cleanroom is a manifest-driven debug/crafting browser. New previewable assets should be added to `src/elements/manifest.tsx`.
+
+Recorded user decision:
+
+- new world elements should be added to the cleanroom by default so they can be refined there before or while being used in gameplay

@@ -5,6 +5,7 @@ This directory contains route-level scene wrappers.
 ## Current Files
 
 - `GrasslandsScene.tsx`: wraps the playable grasslands route canvas and dialogue shell
+- `GrasslandsScene.tsx`: also owns the grasslands inventory/debug overlay shell and input for toggling it
 - `CleanroomScene.tsx`: wraps the cleanroom canvas, browser HUD, action controls, wireframe toggle, and gizmo canvas
 
 ## Purpose
@@ -16,6 +17,7 @@ They should coordinate:
 - canvas setup
 - route-level HUD chrome
 - dialogue shells
+- inventory/debug shell UI
 - cleanroom browser controls
 
 They should not contain detailed creature geometry.

@@ -18,8 +18,20 @@ nodes:
     options:
       - label: "What do you do here?"
         next: watch
+      - label: "Know anything about the field mouse?"
+        next: mouse
+        setFlags:
+          - snake.shared_mouse_seed_clue
       - label: "Can you teach me to be sneaky?"
         next: sneaky
+  mouse:
+    text: "The snake's tongue flicks. 'The mouse hides its best seeds under the flattest grass it can find. Ask about a room, and watch where it glances.'"
+    animation: coil
+    options:
+      - label: "That sounds useful"
+        next: thanks
+      - label: "You are very observant"
+        next: shape
   strike:
     text: "'A coil keeps the spring loaded,' the snake says. 'Stillness first, then motion.'"
     animation: spring

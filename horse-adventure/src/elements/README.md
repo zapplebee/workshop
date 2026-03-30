@@ -31,6 +31,10 @@ The manifest controls:
 3. Register it in `manifest.tsx` if it should be previewable in the cleanroom.
 4. If the element has animations, define a narrow action union type and wire the cleanroom controls through the manifest.
 
+Recorded user decision:
+
+- if a new creature, fixture, or item is added to gameplay, it should also be added to the cleanroom so it can be refined visually
+
 For new creatures, start from:
 
 - `creatures/_template.tsx`
@@ -39,3 +43,4 @@ For new creatures, start from:
 
 - If the object is something you would place into a scene, it belongs in `elements/`.
 - If the object is only page/route UI chrome, it belongs in `scenes/` or elsewhere, not here.
+- items that can be collected into inventory still belong in `elements/items/`; the inventory state itself belongs in `features/inventory/`
