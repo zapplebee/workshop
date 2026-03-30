@@ -1,0 +1,215 @@
+:root {
+  font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  color: #19311f;
+  background: #d8eadb;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+.scene-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(255, 240, 190, 0.88) 0, rgba(255, 240, 190, 0.48) 10%, rgba(159, 205, 245, 0) 30%),
+    linear-gradient(180deg, #7bb4ea 0%, #a9d4fb 28%, #d7eefb 58%, #dcebe0 78%, #c9dfb9 100%);
+}
+
+.scene-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.dialog-shell {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 1rem 1rem;
+  pointer-events: none;
+}
+
+.dialog-card {
+  width: min(36rem, 100%);
+  border: 2px solid rgba(255, 112, 191, 0.55);
+  border-radius: 1rem;
+  background: rgba(28, 39, 24, 0.9);
+  box-shadow: 0 1rem 2rem rgba(22, 33, 21, 0.24);
+  color: #f6f3ea;
+  padding: 1rem;
+  pointer-events: auto;
+}
+
+.dialog-name {
+  color: #ff8fd1;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dialog-text {
+  margin: 0.45rem 0 0;
+}
+
+.dialog-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.dialog-option {
+  border: 1px solid rgba(255, 143, 209, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff5fb;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.55rem 0.9rem;
+}
+
+.dialog-option:hover {
+  background: rgba(255, 143, 209, 0.18);
+}
+
+.workshop-hud {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 0.9rem;
+  background: rgba(17, 31, 56, 0.6);
+  color: #eef6ff;
+  padding: 0.8rem 0.9rem;
+  pointer-events: none;
+}
+
+.workshop-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.92;
+  text-transform: uppercase;
+}
+
+.workshop-help {
+  margin: 0.35rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.workshop-browser {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  pointer-events: auto;
+}
+
+.workshop-browser-group {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.workshop-browser-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0.78;
+  text-transform: uppercase;
+}
+
+.workshop-browser-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.workshop-browser-item {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef6ff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.35rem 0.7rem;
+}
+
+.workshop-browser-item.is-active {
+  background: rgba(130, 183, 255, 0.24);
+  border-color: rgba(130, 183, 255, 0.7);
+}
+
+.workshop-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+  pointer-events: auto;
+}
+
+.workshop-control {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef6ff;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.45rem 0.8rem;
+}
+
+.workshop-control.is-active {
+  background: rgba(255, 143, 209, 0.26);
+  border-color: rgba(255, 143, 209, 0.68);
+}
+
+.workshop-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  pointer-events: auto;
+}
+
+.workshop-toggle input {
+  accent-color: #ff8fd1;
+}
+
+.workshop-gizmo {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 7rem;
+  height: 7rem;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 0.7rem 1.6rem rgba(15, 25, 42, 0.22);
+}
+
+.workshop-gizmo-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (prefers-reduced-motion) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+  }
+}
