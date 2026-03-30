@@ -4,9 +4,8 @@ This directory contains route-level scene wrappers.
 
 ## Current Files
 
-- `GrasslandsScene.tsx`: wraps the playable grasslands route canvas and dialogue shell
-- `GrasslandsScene.tsx`: also owns the grasslands inventory/debug overlay shell and input for toggling it
-- `CleanroomScene.tsx`: wraps the cleanroom canvas, browser HUD, action controls, wireframe toggle, and gizmo canvas
+- `GrasslandsScene.tsx`: wraps the playable grasslands route canvas, left-side HUD, mobile controls, and bottom dialogue shell
+- `CleanroomScene.tsx`: wraps the cleanroom canvas, docked browser HUD, action controls, wireframe toggle, and gizmo canvas
 
 ## Purpose
 
@@ -18,9 +17,16 @@ They should coordinate:
 - route-level HUD chrome
 - dialogue shells
 - inventory/debug shell UI
+- mobile control overlays
 - cleanroom browser controls
 
 They should not contain detailed creature geometry.
+
+Recorded viewport/control decisions:
+
+- dialogue belongs in a black bottom bar, not a floating center card
+- scene nav uses visible UI buttons instead of arrow-key route switching
+- dialogue option keyboard navigation should work without requiring the player to leave the keyboard
 
 ## Cleanroom Philosophy
 

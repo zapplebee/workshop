@@ -14,6 +14,7 @@ import { Cloud } from "../../elements/fixtures/Cloud";
 import { GrassClump } from "../../elements/fixtures/GrassClump";
 import { Hill } from "../../elements/fixtures/Hill";
 import { Carrot } from "../../elements/items/Carrot";
+import { CowboyHat } from "../../elements/items/CowboyHat";
 import type { HorseAction } from "../../elements/creatures/Horse";
 import type { ConversationActor } from "../conversations/types";
 import type { InventoryItemId } from "../inventory/types";
@@ -27,6 +28,7 @@ import { useCameraMode } from "./useCameraMode";
 import { useMovementKeys } from "./useMovementKeys";
 import {
   antagonistHorsePosition,
+  cowboyHatPosition,
   carrotPositions,
   cardinalPosition,
   donkeyPosition,
@@ -110,11 +112,18 @@ export function GrasslandsWorld({
     ...arenaGrassInstances,
     ...plantInstances,
   ], []);
-  const [pickupItems, setPickupItems] = useState<WorldPickup[]>(() => carrotPositions.map((position, index) => ({
-    id: `carrot-${index}`,
-    itemId: "carrot",
-    position,
-  })));
+  const [pickupItems, setPickupItems] = useState<WorldPickup[]>(() => [
+    ...carrotPositions.map((position, index) => ({
+      id: `carrot-${index}`,
+      itemId: "carrot" as const,
+      position,
+    })),
+    {
+      id: "cowboy-hat-0",
+      itemId: "cowboy-hat" as const,
+      position: cowboyHatPosition,
+    },
+  ]);
   const [nearestInteractionId, setNearestInteractionId] = useState<string | null>(null);
   const rabbit: RabbitProps = { id: "rabbit-0", position: rabbitPosition };
   const cameraOverride = useMemo<CameraOverride | null>(() => {
@@ -147,7 +156,7 @@ export function GrasslandsWorld({
 
   const interactables = useMemo<InteractionTarget[]>(
     () => [
-      ...pickupItems.map((item) => ({ id: item.id, kind: "pickup" as const, position: item.position, itemId: item.itemId, range: 4.2 })),
+      ...pickupItems.map((item) => ({ id: item.id, kind: "pickup" as const, position: item.position, itemId: item.itemId, range: item.itemId === "cowboy-hat" ? 4.8 : 4.2 })),
       { id: rabbit.id, kind: "rabbit" as const, position: rabbit.position, range: 5 },
       { id: "snake-0", kind: "snake" as const, position: snakePosition, range: 5.2 },
       { id: "mouse-0", kind: "mouse" as const, position: mousePosition, range: 5 },
@@ -338,11 +347,19 @@ export function GrasslandsWorld({
       ))}
 
       {pickupItems.map((item) => (
-        <Carrot
-          key={item.id}
-          position={[item.position[0], getTerrainHeight(item.position[0], item.position[2]) + 0.02, item.position[2]]}
-          highlighted={false}
-        />
+        item.itemId === "cowboy-hat" ? (
+          <CowboyHat
+            key={item.id}
+            position={[item.position[0], getTerrainHeight(item.position[0], item.position[2]) + 0.02, item.position[2]]}
+            highlighted={false}
+          />
+        ) : (
+          <Carrot
+            key={item.id}
+            position={[item.position[0], getTerrainHeight(item.position[0], item.position[2]) + 0.02, item.position[2]]}
+            highlighted={false}
+          />
+        )
       ))}
     </>
   );

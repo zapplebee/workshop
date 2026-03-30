@@ -3,6 +3,32 @@ import type { PlantProps } from "./types";
 import type { CloudProps } from "../../elements/fixtures/Cloud";
 import type { HillProps } from "../../elements/fixtures/Hill";
 
+function createCanyonEdgeHills(): HillProps[] {
+  const hills: HillProps[] = [];
+  const ridgeCount = 28;
+  const ridgeRadius = 188;
+
+  for (let index = 0; index < ridgeCount; index += 1) {
+    const angle = (index / ridgeCount) * Math.PI * 2;
+    const radiusOffset = index % 2 === 0 ? -4 : 3;
+    const radius = ridgeRadius + radiusOffset;
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    const width = 16 + (index % 3) * 2.8;
+    const height = 4.8 + (index % 4) * 0.7;
+    const depth = 10 + (index % 5) * 1.6;
+    const tint = index % 3 === 0 ? "#87ab63" : index % 3 === 1 ? "#7ea45c" : "#94b870";
+
+    hills.push({
+      position: [x, -2.8 - (index % 3) * 0.18, z],
+      scale: [width, height, depth],
+      tint,
+    });
+  }
+
+  return hills;
+}
+
 export const plants: PlantProps[] = [
   { position: [-5.3, 0, 1.8], scale: 1, lean: -0.2, tint: "#85b668" },
   { position: [-3.6, 0, 0.7], scale: 0.82, lean: 0.12, tint: "#7ea95f" },
@@ -34,6 +60,7 @@ export const hills: HillProps[] = [
   { position: [8.2, -0.28, -16], scale: [7.2, 2.3, 6.1], tint: "#85a95f" },
   { position: [0.5, -0.55, -22], scale: [15.5, 3.5, 10.6], tint: "#7f9f56" },
   { position: [0, -0.82, -9], scale: [11.2, 1.45, 4.6], tint: "#9cbc7b" },
+  ...createCanyonEdgeHills(),
 ];
 
 export const clouds: CloudProps[] = [
@@ -52,13 +79,26 @@ export const cardinalPosition: [number, number, number] = [24, 0, 16];
 export const donkeyPosition: [number, number, number] = [-18, 0, -14];
 export const antagonistHorsePosition: [number, number, number] = [19, 0, -18];
 export const owlPosition: [number, number, number] = [-6, 0, 24];
+export const cowboyHatPosition: [number, number, number] = [17.5, 0, -12.5];
 export const carrotPositions: Array<[number, number, number]> = [
-  [-10.5, 0, 8.8],
-  [-9.2, 0, 9.6],
-  [-8.1, 0, 8.4],
-  [13.2, 0, 10.8],
-  [14.4, 0, 9.9],
-  [15.1, 0, 11.4],
+  [-42, 0, 36],
+  [-31, 0, -28],
+  [-26, 0, 54],
+  [-18, 0, 12],
+  [-12, 0, -44],
+  [-6, 0, 68],
+  [4, 0, -22],
+  [12, 0, 48],
+  [18, 0, -58],
+  [26, 0, 16],
+  [34, 0, 62],
+  [41, 0, -34],
+  [56, 0, 8],
+  [64, 0, -52],
+  [72, 0, 38],
+  [-58, 0, -6],
+  [-74, 0, 22],
+  [0, 0, 84],
 ];
 
 export const horses: HorseConfig[] = [

@@ -12,6 +12,7 @@ If you are a future agent ramping into the project, read these first:
 4. `scenes/README.md`
 5. `conversations/README.md`
 6. `features/README.md`
+7. `features/grasslands/README.md`
 
 Most important architecture file:
 
@@ -48,3 +49,12 @@ The cleanroom is a manifest-driven debug/crafting browser. New previewable asset
 Recorded user decision:
 
 - new world elements should be added to the cleanroom by default so they can be refined there before or while being used in gameplay
+
+## Viewport Notes
+
+Current scene/UI expectations:
+
+- grasslands uses a docked left-side HUD for scene navigation and inventory access
+- dialogue appears in a bottom black bar rather than floating over the middle of the scene
+- cinematic conversation camera tuning should preserve visibility of both speakers above the dialogue bar
+- route switching should come from UI buttons, not global arrow-key listeners

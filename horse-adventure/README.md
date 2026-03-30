@@ -40,6 +40,28 @@ Design rule recorded from the user:
 - if it can be carried, it is inventory
 - if it is just true now, it is a world flag
 
+## Viewport And Controls
+
+Recent UX decisions recorded from the user:
+
+- scene-to-scene navigation should use onscreen UI buttons rather than arrow-key route switching
+- dialogue should live in a black bar at the bottom of the screen
+- cinematic dialogue framing should bias upward so characters remain visible above the dialogue bar
+- interaction feedback should use a pulsing ground ring instead of pink highlight glow on the target itself
+
+Current grasslands controls:
+
+- `W/A/S/D`: move
+- `Space`: interact with the current nearby target
+- `C`: cycle `overview`, `follow`, and `firstPerson`
+- `I`: toggle inventory
+- dialogue options:
+  - `ArrowLeft` / `ArrowUp`: previous option
+  - `ArrowRight` / `ArrowDown`: next option
+  - `Enter` / `Space`: confirm selected option
+
+Mobile grasslands support now includes onscreen controls for movement, interaction, and camera cycling.
+
 ## Important Directories
 
 - `src/elements/`
@@ -77,7 +99,7 @@ User decision recorded:
   - `/cleanroom/snake`
   - `/cleanroom/carrot`
   - `/cleanroom/cloud`
-- arrow keys switch between `/grasslands` and the cleanroom route set
+- scene switching is handled by onscreen nav buttons in the scene UI
 
 ## For Future Agents
 

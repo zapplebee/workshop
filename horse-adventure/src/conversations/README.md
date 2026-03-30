@@ -66,3 +66,4 @@ Recorded user decisions:
 - clues and other non-physical truth/state belong in world flags
 - world flags should stay flat and human-readable, for example `rabbit.carrots_given`
 - the raw flag ids are acceptable in debug UI; no friendly-label layer is required yet
+- dialogue choices should be keyboard-navigable so the player's hands can stay on the keyboard

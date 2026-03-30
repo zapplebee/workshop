@@ -33,14 +33,24 @@ body {
   display: block;
 }
 
-.scene-nav {
+.scene-sidebar {
   position: absolute;
   top: 1rem;
-  left: 50%;
+  left: 1rem;
   z-index: 2;
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+}
+
+.scene-nav {
   display: flex;
   gap: 0.55rem;
-  transform: translateX(-50%);
+}
+
+.scene-nav-sidebar {
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .scene-nav-button {
@@ -111,17 +121,21 @@ body {
   inset: auto 0 0 0;
   display: flex;
   justify-content: center;
-  padding: 0 1rem 1rem;
+  padding: 0;
   pointer-events: none;
 }
 
+.dialog-shell-sidebar {
+  inset: 1rem 1rem 1rem auto;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0;
+}
+
 .inventory-shell {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
+  position: static;
   display: grid;
   gap: 0.75rem;
-  z-index: 2;
 }
 
 .inventory-toggle,
@@ -141,7 +155,7 @@ body {
 }
 
 .inventory-panel {
-  width: min(24rem, calc(100vw - 2rem));
+  width: min(21rem, calc(100vw - 2rem));
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 1rem;
   background: rgba(16, 28, 46, 0.9);
@@ -225,13 +239,14 @@ body {
 }
 
 .dialog-card {
-  width: min(36rem, 100%);
-  border: 2px solid rgba(255, 112, 191, 0.55);
-  border-radius: 1rem;
-  background: rgba(28, 39, 24, 0.9);
-  box-shadow: 0 1rem 2rem rgba(22, 33, 21, 0.24);
+  width: min(100%, 100vw);
+  min-height: 9.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.92);
+  box-shadow: 0 -0.8rem 2rem rgba(0, 0, 0, 0.28);
   color: #f6f3ea;
-  padding: 1rem;
+  padding: 1rem 1.25rem 1.15rem;
   pointer-events: auto;
 }
 
@@ -244,6 +259,7 @@ body {
 }
 
 .dialog-text {
+  max-width: 54rem;
   margin: 0.45rem 0 0;
 }
 
@@ -252,6 +268,7 @@ body {
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-top: 1rem;
+  max-width: 54rem;
 }
 
 .dialog-option {
@@ -268,6 +285,12 @@ body {
   background: rgba(255, 143, 209, 0.18);
 }
 
+.dialog-option.is-active {
+  background: rgba(255, 143, 209, 0.24);
+  border-color: rgba(255, 143, 209, 0.82);
+  box-shadow: 0 0 0 2px rgba(255, 143, 209, 0.16);
+}
+
 .workshop-hud {
   position: absolute;
   top: 1rem;
@@ -278,6 +301,12 @@ body {
   color: #eef6ff;
   padding: 0.8rem 0.9rem;
   pointer-events: none;
+}
+
+.workshop-hud-docked {
+  width: min(21rem, calc(100vw - 2rem));
+  display: grid;
+  gap: 0.8rem;
 }
 
 .workshop-title {
@@ -401,12 +430,32 @@ body {
     display: flex;
   }
 
-  .inventory-shell {
-    top: auto;
-    bottom: 7.4rem;
+  .scene-sidebar {
+    top: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    gap: 0.65rem;
   }
 
-  .dialog-shell {
-    padding-bottom: 8.8rem;
+  .scene-nav-sidebar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .inventory-panel {
+    width: min(19rem, calc(100vw - 1.5rem));
+  }
+
+  .dialog-shell-sidebar {
+    inset: auto 0 8.7rem 0;
+    align-items: end;
+    justify-content: center;
+    padding: 0 0.75rem;
+  }
+
+  .dialog-card {
+    min-height: 8.8rem;
+    padding: 0.9rem 1rem 1rem;
   }
 }

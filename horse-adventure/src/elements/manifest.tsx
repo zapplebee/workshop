@@ -13,6 +13,7 @@ import { Cloud } from "./fixtures/Cloud";
 import { GrassClump } from "./fixtures/GrassClump";
 import { Hill } from "./fixtures/Hill";
 import { Carrot } from "./items/Carrot";
+import { CowboyHat } from "./items/CowboyHat";
 
 export type ElementCategory = "creatures" | "fixtures" | "items";
 
@@ -191,6 +192,19 @@ export const elementManifest = [
       wireframeLabel: "Wireframe carrot",
     },
     render: ({ wireframe }) => <Carrot position={[0, 0, 0]} wireframe={wireframe} />,
+  },
+  {
+    id: "cowboy-hat",
+    name: "Cowboy Hat",
+    category: "items",
+    controls: {
+      title: "Cowboy Hat Preview",
+      help: "Drag to orbit, scroll to zoom, right-drag to pan, arrow keys to switch scenes.",
+      actions: ["still"] as const,
+      defaultAction: "still",
+      wireframeLabel: "Wireframe cowboy hat",
+    },
+    render: ({ wireframe }) => <CowboyHat position={[0, 0, 0]} wireframe={wireframe} />,
   },
 ] satisfies ElementManifestEntry[];
 

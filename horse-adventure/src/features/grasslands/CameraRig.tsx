@@ -59,12 +59,12 @@ export function CameraRig({ horseRef, mode, override = null }: { horseRef: RefOb
 
       cinematicTarget.set(
         (horseFace.x + override.targetPosition[0]) * 0.5,
-        (horseFace.y + override.targetPosition[1] + creatureFocusHeight) * 0.5,
+        (horseFace.y + override.targetPosition[1] + creatureFocusHeight) * 0.5 - 1.1,
         (horseFace.z + override.targetPosition[2]) * 0.5,
       );
       const targetDistance = Math.hypot(dx, dz);
-      const cameraDistance = Math.max(4.8, Math.min(7.4, targetDistance * 0.55 + 3));
-      const cameraHeight = Math.max(horse.position.y + 3.2, cinematicTarget.y + 1.1);
+      const cameraDistance = Math.max(7, Math.min(9.8, targetDistance * 0.64 + 4.1));
+      const cameraHeight = Math.max(horse.position.y + 5.4, cinematicTarget.y + 2.2);
 
       cinematicDirection.set(forwardX, 0, forwardZ);
       cameraPosition.set(
@@ -73,7 +73,7 @@ export function CameraRig({ horseRef, mode, override = null }: { horseRef: RefOb
         horseFace.z - cinematicDirection.z * cameraDistance + forwardX * 0.8,
       );
       lookTarget.copy(cinematicTarget);
-      camera.fov += (48 - camera.fov) * smoothing;
+      camera.fov += (50 - camera.fov) * smoothing;
       camera.position.lerp(cameraPosition, smoothing);
       camera.updateProjectionMatrix();
       camera.lookAt(lookTarget);

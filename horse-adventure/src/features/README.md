@@ -15,12 +15,13 @@ This directory contains gameplay and app-level subsystems that are larger than a
   - world data
   - movement/camera/interaction logic
   - grasslands world composition
+  - see `grasslands/README.md` for control and camera behavior notes
 - `inventory/`
   - physical, possessable things
   - stackables and physical key items
   - intentionally in-memory for now
 - `navigation/`
-  - cross-route scene switching helpers
+  - route-derived scene mode helpers
 - `world-flags/`
   - non-physical truth/state
   - clues, learned facts, and progression flags
@@ -36,6 +37,13 @@ Examples:
 - conversation runtime rules
 - world flags
 - grasslands interaction/camera logic
+
+Important recent control/camera behavior lives in `grasslands/`:
+
+- three-mode player camera cycling (`overview`, `follow`, `firstPerson`)
+- temporary cinematic dialogue camera override
+- pulsing ground interaction indicator
+- mobile interaction signal handling
 
 Do not put reusable world geometry here unless it is tightly coupled to subsystem logic. Pure renderable pieces should stay in `src/elements/`.
 

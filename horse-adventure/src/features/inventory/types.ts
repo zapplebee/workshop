@@ -1,6 +1,6 @@
 export type InventoryItemKind = "stackable" | "key";
 
-export type InventoryItemId = "carrot";
+export type InventoryItemId = "carrot" | "flowers" | "mysterious-letter" | "cowboy-hat";
 
 export type InventoryItemDefinition = {
   id: InventoryItemId;

@@ -40,16 +40,15 @@ export function CleanroomScene<Action extends string>({
         <Suspense fallback={null}>{sceneContent}</Suspense>
       </Canvas>
 
-      <div className="scene-nav">
-        <button className="scene-nav-button" type="button" onClick={onGoToGrasslands}>
-          Grasslands
-        </button>
-        <button className="scene-nav-button is-active" type="button">
-          Cleanroom
-        </button>
-      </div>
-
-      <div className="workshop-hud">
+      <div className="workshop-hud workshop-hud-docked">
+        <div className="scene-nav scene-nav-sidebar">
+          <button className="scene-nav-button" type="button" onClick={onGoToGrasslands}>
+            Grasslands
+          </button>
+          <button className="scene-nav-button is-active" type="button">
+            Cleanroom
+          </button>
+        </div>
         <div className="workshop-title">{title}</div>
         <p className="workshop-help">{help}</p>
         <div className="workshop-browser">

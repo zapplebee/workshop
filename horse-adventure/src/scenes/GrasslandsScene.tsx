@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useEffect, type ReactNode } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 import type { ConversationOption } from "../features/conversations/types";
 import { InventoryPanel } from "../features/inventory/InventoryPanel";
 import type { InventoryDisplayEntry } from "../features/inventory/types";
@@ -104,8 +104,47 @@ export function GrasslandsScene({
   onToggleInventory,
   onMobileInteract,
 }: GrasslandsSceneProps) {
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState(0);
+
+  useEffect(() => {
+    setSelectedOptionIndex(0);
+  }, [activeNode]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (activeNode) {
+        const optionCount = activeNode.options?.length ?? 0;
+
+        if (event.code === "ArrowLeft" || event.code === "ArrowUp") {
+          event.preventDefault();
+          if (optionCount > 0) {
+            setSelectedOptionIndex((current) => (current - 1 + optionCount) % optionCount);
+          }
+          return;
+        }
+
+        if (event.code === "ArrowRight" || event.code === "ArrowDown") {
+          event.preventDefault();
+          if (optionCount > 0) {
+            setSelectedOptionIndex((current) => (current + 1) % optionCount);
+          }
+          return;
+        }
+
+        if (event.code === "Enter" || event.code === "Space") {
+          event.preventDefault();
+          if (optionCount > 0) {
+            const option = activeNode.options?.[selectedOptionIndex];
+            if (option) {
+              onConversationOption(option);
+            }
+          } else {
+            onCloseConversation();
+          }
+          return;
+        }
+      }
+
       if (event.code !== "KeyI" || event.repeat) {
         return;
       }
@@ -119,7 +158,7 @@ export function GrasslandsScene({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onToggleInventory]);
+  }, [activeNode, onCloseConversation, onConversationOption, onToggleInventory, selectedOptionIndex]);
 
   return (
     <div className="scene-shell">
@@ -127,16 +166,18 @@ export function GrasslandsScene({
         <Suspense fallback={null}>{sceneContent}</Suspense>
       </Canvas>
 
-      <div className="scene-nav">
-        <button className="scene-nav-button is-active" type="button">
-          Grasslands
-        </button>
-        <button className="scene-nav-button" type="button" onClick={onGoToCleanroom}>
-          Cleanroom
-        </button>
-      </div>
+      <div className="scene-sidebar">
+        <div className="scene-nav scene-nav-sidebar">
+          <button className="scene-nav-button is-active" type="button">
+            Grasslands
+          </button>
+          <button className="scene-nav-button" type="button" onClick={onGoToCleanroom}>
+            Cleanroom
+          </button>
+        </div>
 
-      <InventoryPanel isOpen={inventoryOpen} supplies={inventorySupplies} keyItems={inventoryKeyItems} debugFlags={debugFlags} onToggle={onToggleInventory} />
+        <InventoryPanel isOpen={inventoryOpen} supplies={inventorySupplies} keyItems={inventoryKeyItems} debugFlags={debugFlags} onToggle={onToggleInventory} />
+      </div>
 
       <MobileControls onInteract={onMobileInteract} disabled={activeNode !== null} />
 
@@ -147,12 +188,18 @@ export function GrasslandsScene({
             <p className="dialog-text">{activeNode.text}</p>
             <div className="dialog-options">
               {activeNode.options?.map((option, index) => (
-                <button key={index} className="dialog-option" type="button" onClick={() => onConversationOption(option)}>
+                <button
+                  key={index}
+                  className={`dialog-option${selectedOptionIndex === index ? " is-active" : ""}`}
+                  type="button"
+                  onClick={() => onConversationOption(option)}
+                  onMouseEnter={() => setSelectedOptionIndex(index)}
+                >
                   {option.label}
                 </button>
               ))}
               {!activeNode.options?.length ? (
-                <button className="dialog-option" type="button" onClick={onCloseConversation}>
+                <button className="dialog-option is-active" type="button" onClick={onCloseConversation}>
                   Continue
                 </button>
               ) : null}
