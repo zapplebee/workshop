@@ -213,7 +213,6 @@ When creating a new animal, do this in order:
 ## Current Project Notes
 
 - The cleanroom already supports:
-  - arrow-key scene switching
   - orbit camera controls
   - manifest-driven asset browser
   - action buttons per selected element

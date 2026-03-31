@@ -2,10 +2,11 @@
 
 This project is a Bun-served React app for iterating on blocky creatures, fixtures, interactions, and dialogue.
 
-The app currently has two route-level scenes:
+The app currently has three route-level scenes:
 
 - `/grasslands`: the playable world scene
 - `/cleanroom/:elementId`: the asset debug/crafting scene
+- `/upload`: file upload UI for remote asset intake (e.g. heightmap PNGs)
 
 ## Runtime Layout
 
@@ -13,6 +14,9 @@ The app currently has two route-level scenes:
   - Bun server entry point
   - serves `index.html`
   - serves YAML conversations from `src/conversations/`
+  - `GET /api/uploads`: lists files in `tmp/uploads/`
+  - `POST /api/uploads`: accepts multipart file upload, writes to `tmp/uploads/`
+  - `GET /uploads/*`: serves individual uploaded files
 - `src/frontend.tsx`
   - browser React entry point
 - `src/App.tsx`

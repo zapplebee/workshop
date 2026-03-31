@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Color, Float32BufferAttribute, PlaneGeometry } from "three";
 import { CANYON_WALL_HEIGHT } from "./worldData";
 
-const terrainHeightmapUrl = "/uploads/download.png";
+const terrainHeightmapUrl = "/assets/terrain/box-canyon-heightmap.png";
 
 const TERRAIN_WORLD_SIZE = 440;
 const TERRAIN_SEGMENTS = 220;

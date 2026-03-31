@@ -6,6 +6,7 @@ This directory contains route-level scene wrappers.
 
 - `GrasslandsScene.tsx`: wraps the playable grasslands route canvas, left-side HUD, mobile controls, and bottom dialogue shell
 - `CleanroomScene.tsx`: wraps the cleanroom canvas, docked browser HUD, action controls, wireframe toggle, and gizmo canvas
+- `UploadScene.tsx`: plain HTML panel (no 3D canvas) for uploading files and listing `tmp/uploads/` contents
 
 ## Purpose
 

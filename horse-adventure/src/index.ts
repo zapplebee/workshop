@@ -5,6 +5,7 @@ import { conversationActors, getConversationApiPath } from "./features/conversat
 import index from "./index.html";
 
 const uploadDirectory = new URL("../tmp/uploads/", import.meta.url);
+const assetDirectory = new URL("./assets/", import.meta.url);
 
 async function ensureUploadDirectory() {
   await mkdir(uploadDirectory, { recursive: true });
@@ -57,6 +58,19 @@ async function handleUpload(request: Request) {
   });
 }
 
+async function serveAssetFile(request: Request) {
+  const url = new URL(request.url);
+  const requestedPath = url.pathname.replace("/assets/", "");
+  const safePath = requestedPath.split("/").map(sanitizeFilename).join("/");
+  const file = Bun.file(new URL(safePath, assetDirectory));
+
+  if (!(await file.exists())) {
+    return new Response("Not found", { status: 404 });
+  }
+
+  return new Response(file);
+}
+
 async function serveUploadedFile(request: Request) {
   await ensureUploadDirectory();
   const url = new URL(request.url);
@@ -86,6 +100,7 @@ const server = serve({
       GET: async () => Response.json({ files: await listUploads() }),
       POST: handleUpload,
     },
+    "/assets/*": serveAssetFile,
     "/uploads/*": serveUploadedFile,
     "/*": index,
   },

@@ -10,12 +10,9 @@ Use this directory for things like:
 - rewards
 - consumables that are represented as standalone world assets
 
-## Current State
+## Current Items
 
-This directory is intentionally empty right now.
+- `Carrot.tsx`: stackable pickup collectible, registered in the manifest under `items`
+- `CowboyHat.tsx`: key item pickup, registered in the manifest under `items`
 
-When the first item is added:
-
-1. place its component here
-2. register it in `../manifest.tsx` if it should be previewable in the cleanroom
-3. document any interaction/state conventions alongside it
+Both are placed in the grasslands world and collectible by the player horse.
